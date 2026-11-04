@@ -199,21 +199,38 @@ function makeApi(store, env = {}) {
       const sid = +body.sid || 1;
       const list = [...new Set((Array.isArray(body.nicks) ? body.nicks : []).slice(0, 600).map(normNick).filter(Boolean))];
       const exists = [];
-      for (let i = 0; i < list.length; i += 25) exists.push(...(await Promise.all(list.slice(i, i + 25).map((n) => store.users.get(n)))));
+      for (let i = 0; i < list.length; i += 50) exists.push(...(await Promise.all(list.slice(i, i + 50).map((n) => store.users.get(n)))));
       const marks = {}, add = (p, n) => (marks[Math.floor(p / CHUNK)] ||= []).push([p % CHUNK, n]);
       list.forEach((n, i) => { const r = exists[i]; if (r && r.data.p != null) add(r.data.p, n); });
-      const freshIdx = list.map((_, i) => i).filter((i) => !exists[i] || exists[i].data.p == null), fresh = freshIdx.map((i) => list[i]);
+      const freshIdx = list.map((_, i) => i).filter((i) => !exists[i] || exists[i].data.p == null);
+      // 1-bosqich: yozuvni yaratish (joysiz). Faqat g‘olib bo‘lganlar keyingi bosqichga o‘tadi — shuning uchun joylar bekorga band bo‘lmaydi
+      const made = [];
+      for (let i = 0; i < freshIdx.length; i += 50) {
+        const part = freshIdx.slice(i, i + 50);
+        const res = await Promise.all(part.map((k) => { const old = exists[k]; return store.users.put(list[k], { a: 1, c: now() }, old ? { ifMatch: old.etag } : { ifNew: true }); }));
+        res.forEach((ok, j) => ok && made.push(list[part[j]]));
+      }
+      // 2-bosqich: faqat yaratilganlarga joy berish
       let placed = 0;
-      if (fresh.length) {
-        const start = await alloc(fresh.length);
-        for (let i = 0; i < fresh.length; i += 25) {
-          const res = await Promise.all(fresh.slice(i, i + 25).map((n, j) => { const old = exists[freshIdx[i + j]]; return store.users.put(n, { a: 1, p: start + i + j, c: now() }, old ? { ifMatch: old.etag } : { ifNew: true }); }));
-          res.forEach((ok, j) => { if (ok) { placed++; add(start + i + j, fresh[i + j]); } });
+      if (made.length) {
+        const start = await alloc(made.length);
+        for (let i = 0; i < made.length; i += 50) {
+          await Promise.all(made.slice(i, i + 50).map((n, j) => cas(store.users, n, (d) => { d.p = start + i + j; return d; }, () => ({ a: 1, c: now() }))));
         }
+        made.forEach((n, i) => { add(start + i, n); placed++; });
       }
       await Promise.all(Object.keys(marks).map((k) => cas(store.lot, "c" + k, (arr) => { marks[k].forEach(([i, n]) => { if (arr[i] && arr[i][0] === n) arr[i][4] = sid; else if (!arr[i]) arr[i] = [n, "", 0, 0, sid]; }); return arr; }, () => new Array(CHUNK).fill(null))));
       const cfg = await cas(store.meta, "config", (c) => { c.allow = (c.allow || 0) + placed; return c; }, () => ({}));
-      return { ok: true, received: list.length, added: placed, verified: list.length - fresh.length, total: cfg.next };
+      return { ok: true, received: list.length, added: placed, verified: list.length - freshIdx.length, total: cfg.next };
+    }
+    if (body.action === "wipe") {     // faqat sinov ma‘lumotlarini tozalash uchun (hammasini o‘chiradi!)
+      if (body.confirm !== "HAMMASINI_OCHIR") throw new HttpError(400, "Tasdiqlash so’zi noto’g’ri");
+      const ks = [...(await store.users.list("")).map((k) => [store.users, k]), ...(await store.lot.list("")).map((k) => [store.lot, k])];
+      const LIMIT = 300, batch = ks.slice(0, LIMIT);
+      for (let i = 0; i < batch.length; i += 50) await Promise.all(batch.slice(i, i + 50).map(([a, k]) => a.del(k)));
+      const left = ks.length - batch.length;
+      if (left === 0) for (const m of ["config", "stats", "daily", "featured", "sync"]) { try { await store.meta.del(m); } catch {} }
+      return { ok: true, deleted: batch.length, left };
     }
     if (body.action === "sync-finish") {        // bugungi ro‘yxatda yo‘qlarni chiqarib yuborish (bo‘laklab, vaqt chegarasiga sig‘ishi uchun)
       const sid = +body.sid, from = Math.max(0, body.from | 0), STEP = 5, GRACE = 24 * 3600e3;

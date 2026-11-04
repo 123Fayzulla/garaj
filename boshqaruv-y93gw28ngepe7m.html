@@ -1,55 +1,150 @@
 <!DOCTYPE html>
 <html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Garaj boshqaruvi</title>
-<style>body{font:16px system-ui,sans-serif;background:#2a1a45;color:#fff1d6;margin:0;padding:16px;max-width:560px;margin:0 auto}h1{font-size:22px}h2{font-size:17px;margin:22px 0 4px}label{display:block;margin:10px 0 6px;font-weight:700}input,textarea{width:100%;font:16px system-ui;padding:11px;border-radius:12px;border:2px solid #ffd27a;background:#fff1d6;color:#2a1a45}textarea{min-height:150px}button{margin-top:10px;font:700 16px system-ui;padding:12px 16px;border-radius:12px;border:2px solid #2a1a45;background:#ffd27a;color:#2a1a45}pre{background:#1a0f2e;padding:12px;border-radius:12px;white-space:pre-wrap;word-break:break-word}small{opacity:.8}</style></head><body>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:14px 14px 90px;background:#2a1a45;color:#fff1d6;font:17px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:600px;margin:0 auto}
+h1{font-size:24px;margin:6px 0 14px}h2{font-size:19px;margin:0 0 8px}
+.card{background:#3a2a5a;border:2px solid #5b4684;border-radius:18px;padding:16px;margin:0 0 14px}
+label{display:block;font-weight:700;margin:10px 0 6px}
+input[type=text],input[type=password],select{width:100%;font:17px system-ui;padding:13px;border-radius:12px;border:2px solid #ffd27a;background:#fff1d6;color:#2a1a45}
+input[type=file]{width:100%;font:16px system-ui;color:#fff1d6;padding:10px 0}
+button{font:700 17px system-ui;padding:14px 16px;border-radius:14px;border:0;background:#ffd27a;color:#2a1a45;margin-top:10px;cursor:pointer}
+button.big{width:100%;padding:17px;font-size:19px}button.ghost{background:#5b4684;color:#fff1d6}button.red{background:#ff9d8a}
+button:disabled{opacity:.55}.row{display:flex;gap:8px}.row>*{flex:1}
+.num{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}.num div{background:#2a1a45;border-radius:12px;padding:10px 12px}.num b{display:block;font-size:26px;color:#ffd27a}.num span{font-size:14px;opacity:.85}
+.warn{background:#5a2a00;border:2px solid #ff9d3a;border-radius:12px;padding:12px;margin:10px 0}.ok{background:#12452b;border:2px solid #3ec27a;border-radius:12px;padding:12px;margin:10px 0}.bad{background:#5a1a1a;border:2px solid #ff6b6b;border-radius:12px;padding:12px;margin:10px 0}
+small,.hint{opacity:.85;font-size:15px}.prog{height:14px;background:#2a1a45;border-radius:8px;overflow:hidden;margin:12px 0;display:none}.prog i{display:block;height:100%;width:0;background:#ffd27a;transition:width .2s}
+details summary{font-weight:700;font-size:18px;cursor:pointer;padding:2px 0}details[open] summary{margin-bottom:10px}
+hr{border:0;border-top:1px solid #5b4684;margin:14px 0}a{color:#ffd27a}
+#msg{position:sticky;top:6px;z-index:5}#msg>div{box-shadow:0 4px 14px rgba(0,0,0,.4)}
+</style></head><body>
 <h1>Garaj boshqaruvi</h1>
-<label for="k">Admin kalit (ADMIN_KEY)</label><input id="k" type="password" autocomplete="off">
 
-<h2>0. Instagram akkauntingiz</h2>
-<small>Ogohlantirishlarda "@akkaunt ga obuna bo‘lish" tugmasi chiqishi uchun.</small>
-<input id="igN" placeholder="akkaunt nomi (@ siz)" value="milliy_animatsiya"><button id="igB">Saqlash</button>
+<section class="card" id="login">
+  <h2>Kirish</h2>
+  <label for="k">Parol (ADMIN_KEY)</label>
+  <input id="k" type="password" autocomplete="off" placeholder="parolni yozing">
+  <button class="big" id="go">Kirish</button>
+</section>
 
-<h2>1. Kunlik obunachilar ro‘yxati</h2>
-<small>Instagram → Sozlamalar → "Ma’lumotlaringizni yuklab olish" → Obunachilar (JSON). Olingan <b>followers_1.json</b> (va bor bo‘lsa followers_2.json) faylini shu yerga tanlang. Yoki niklarni qo‘lda yozing. Har kim nikini yozib darhol mashina oladi. Siz bu yerga har kuni Instagram ro‘yxatini yuklaysiz: ro‘yxatdagilar tasdiqlanadi, yangi obunachilar qo‘shiladi, <b>ro‘yxatda yo‘qlar turargohdan chiqariladi</b>. Oxirgi 24 soatda kelganlar tegilmaydi (Instagram fayli ularni hali ko‘rsatmagan bo‘lishi mumkin).</small>
-<label for="f">Instagram fayli (JSON)</label><input id="f" type="file" accept=".json,application/json" multiple>
-<textarea id="n" placeholder="sevara_01&#10;bek.uz&#10;..."></textarea>
-<label style="font-weight:400"><input type="checkbox" id="clean" checked style="width:auto"> Ro‘yxatda yo‘qlarni chiqarib yuborish</label>
-<button id="imp">Kunlik ro‘yxatni yuklash</button>
+<main id="app" hidden>
+  <div id="msg"></div>
 
-<h2>2. PINni tiklash</h2>
-<small>Obunachi PINni unutsa: nikini yozing. PIN o‘chadi va u yangi PIN o‘rnata oladi (mashinasi saqlanib qoladi).</small>
-<input id="r" placeholder="nik"><button id="rst">PINni tiklash</button>
+  <section class="card">
+    <h2>1. Holat</h2>
+    <div class="num">
+      <div><b id="nSlots">–</b><span>turargohda joy</span></div>
+      <div><b id="nReal">–</b><span>haqiqiy mashina</span></div>
+      <div><b id="nChosen">–</b><span>o‘zi tanlaganlar</span></div>
+      <div><b id="nHoles">–</b><span>bo‘sh joy</span></div>
+    </div>
+    <div id="holeWarn" class="warn" hidden><b>Bo‘sh joylar bor.</b> Turargohda mashinasiz katakchalar ko‘rinadi. Pastdagi <b>"Tozalab qayta yuklash"</b> tugmasi bilan tuzating.</div>
+    <button class="ghost" id="refresh">Yangilash</button>
+  </section>
 
-<h2>3. Podium darajasi</h2>
-<small>Faol obunachilarni rag‘batlantiring: kumush yoki oltin podium turargohda ajralib turadi.</small>
-<input id="lvN" placeholder="nik"><select id="lvL" style="width:100%;font:16px system-ui;padding:11px;border-radius:12px;border:2px solid #ffd27a;margin-top:8px"><option value="0">Oddiy</option><option value="1">Kumush</option><option value="2">Oltin</option></select>
-<button id="lvB">Darajani berish</button>
+  <section class="card">
+    <h2>2. Har kungi ish: obunachilar ro‘yxati</h2>
+    <p class="hint">Instagram'dan yuklab olgan <b>followers_1.json</b> faylini tanlang (bir nechta bo‘lsa, hammasini birga). Keyin tugmani bosing. Yangi obunachilar qo‘shiladi, obunani bekor qilganlar chiqariladi.</p>
+    <input id="f" type="file" accept=".json,application/json" multiple>
+    <button class="big" id="up">Ro‘yxatni yuklash</button>
+    <div class="prog" id="prog"><i></i></div>
+    <button class="big red" id="fix" hidden>Tozalab qayta yuklash</button>
+  </section>
 
-<h2>4. Kun mashinasi</h2>
-<small>Har kuni avtomatik tanlanadi va turargoh oldidagi alohida katta sahnada turadi. Xohlasangiz, bugun uchun o‘zingiz nik yozib tanlang. Bo‘sh qoldirib bossangiz, yana avtomatik tanlovga qaytadi.</small>
-<input id="ftN" placeholder="nik (bo‘sh = olib tashlash)"><button id="ftB">Bugungi kun mashinasini belgilash</button>
+  <details class="card">
+    <summary>Qo‘shimcha amallar</summary>
+    <label for="igN">Instagram akkauntingiz (@ siz)</label>
+    <input id="igN" type="text" value="milliy_animatsiya" autocapitalize="off">
+    <button id="igB">Saqlash</button>
+    <hr>
+    <label for="rN">PIN unutilgan odamning niki</label>
+    <input id="rN" type="text" placeholder="nik" autocapitalize="off">
+    <button id="rB">PINni tiklash</button>
+    <hr>
+    <label for="lN">Podium berish: nik</label>
+    <input id="lN" type="text" placeholder="nik" autocapitalize="off">
+    <select id="lL" style="margin-top:8px"><option value="0">Oddiy podium</option><option value="1">Kumush podium</option><option value="2">Oltin podium</option></select>
+    <button id="lB">Podiumni berish</button>
+    <hr>
+    <label for="fN">Bugungi kun mashinasi (bo‘sh = avtomatik)</label>
+    <input id="fN" type="text" placeholder="nik" autocapitalize="off">
+    <button id="fB">Belgilash</button>
+    <hr>
+    <button id="stt">Tizimni tekshirish</button>
+    <button id="ex" class="ghost">Zaxira nusxa (yuklab olish)</button>
+    <button id="out" class="ghost">Chiqish</button>
+  </details>
 
-<h2>0.5. Tizimni tekshirish (joylagandan keyin birinchi bo‘lib bosing)</h2>
-<small>Saqlash tizimi to‘g‘ri ishlayotganini haqiqiy serverda tekshiradi. Hammasi ✓ bo‘lishi kerak.</small>
-<button id="stt">Tizimni tekshirish</button>
+  <details class="card">
+    <summary>Xavfli amallar</summary>
+    <p class="hint">Hamma obunachi, mashina va PINlar o‘chadi. Faqat sinov ma’lumotlarini tozalash uchun.</p>
+    <button id="wp" class="red">Hammasini o‘chirish</button>
+  </details>
+</main>
 
-<h2>5. Statistika va zaxira</h2>
-<button id="st">Statistika</button> <button id="ex">Zaxira nusxa (yuklab olish)</button>
-<pre id="o"></pre>
 <script>
-const $=i=>document.getElementById(i), out=t=>$('o').textContent=typeof t==='string'?t:JSON.stringify(t,null,2);
-async function call(b){const r=await fetch('/api/admin',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:$('k').value,...b})});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j}
+const $=i=>document.getElementById(i);
+let KEY='';
+function say(text,kind){const d=document.createElement('div');d.className=kind||'ok';d.textContent=text;$('msg').replaceChildren(d);if(kind!=='bad')window.scrollTo({top:0,behavior:'smooth'})}
+async function call(b,tries=3){let last;for(let t=0;t<tries;t++){try{const r=await fetch('/api/admin',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:KEY,...b})});let j;try{j=await r.json()}catch(e){throw new Error('Server javob bermadi ('+r.status+')')}if(!r.ok){const e=new Error(j.error||('Xato '+r.status));e.code=r.status;throw e}return j}catch(e){last=e;if(e.code&&e.code<500)throw e;await new Promise(r=>setTimeout(r,800*(t+1)))}}throw last}
+function bar(p){const b=$('prog');b.style.display='block';b.firstElementChild.style.width=Math.round(p*100)+'%'}
+function busy(on){['up','fix','wp','stt','ex','igB','rB','lB','fB','refresh'].forEach(i=>{const e=$(i);if(e)e.disabled=on})}
+const fmt=n=>Number(n).toLocaleString('ru-RU');
+
+async function refresh(){
+  const j=await call({action:'stats'});const next=(j.config&&j.config.next)||0,real=j.total||0,holes=Math.max(0,next-real);
+  $('nSlots').textContent=fmt(next);$('nReal').textContent=fmt(real);$('nChosen').textContent=fmt(j.claimed||0);$('nHoles').textContent=fmt(holes);
+  $('nHoles').style.color=holes>0?'#ff9d8a':'#ffd27a';$('holeWarn').hidden=!holes;$('fix').hidden=!holes;
+  return {next,real,holes};
+}
+async function login(silent){
+  KEY=$('k').value.trim();if(!KEY){return}
+  try{await refresh();localStorage.setItem('gk',KEY);$('login').hidden=true;$('app').hidden=false;if(!silent)say('Xush kelibsiz!')}
+  catch(e){localStorage.removeItem('gk');$('login').hidden=false;$('app').hidden=true;if(!silent){alert(e.code===403?'Parol noto‘g‘ri':e.message)}}
+}
+$('go').onclick=()=>login(false);$('k').onkeydown=e=>{if(e.key==='Enter')login(false)};
+try{const s=localStorage.getItem('gk');if(s){$('k').value=s;login(true)}}catch(e){}
+$('out').onclick=()=>{try{localStorage.removeItem('gk')}catch(e){}location.reload()};
+$('refresh').onclick=async()=>{try{await refresh();say('Yangilandi')}catch(e){say(e.message,'bad')}};
+
 function parseNicks(text){try{const j=JSON.parse(text),out=[];(function w(x){if(Array.isArray(x))x.forEach(w);else if(x&&typeof x==='object'){if(Array.isArray(x.string_list_data))x.string_list_data.forEach(s=>{if(s.value)out.push(s.value);else if(s.href)out.push(s.href.split('/').filter(Boolean).pop())});else Object.values(x).forEach(w)}})(j);if(out.length)return out}catch(e){}return text.split(/[\s,;]+/).filter(Boolean)}
-$('imp').onclick=async()=>{try{const raw=[];for(const part of [$('n').value,...await Promise.all([...$('f').files].map(f=>f.text()))])raw.push(...parseNicks(part));const all=[...new Set(raw.map(x=>String(x).trim().toLowerCase().replace(/^@/,'')).filter(Boolean))];if(!all.length){out('Ro‘yxat bo‘sh');return}
- if($('clean').checked&&all.length<50&&!confirm('Ro‘yxatda atigi '+all.length+' ta nik bor. Qolganlar chiqariladi. Davom etasizmi?'))return;
- const {sid}=await call({action:'sync-start'});let added=0,verified=0;
- for(let i=0;i<all.length;i+=500){const j=await call({action:'import',sid,nicks:all.slice(i,i+500)});added+=j.added;verified+=j.verified;out(`Yuklanmoqda: ${Math.min(i+500,all.length)} / ${all.length}`)}
- let removed=0,kept=0;if($('clean').checked){let from=0;for(;;){const j=await call({action:'sync-finish',sid,from});removed+=j.removed;kept+=j.kept;out(`Tozalanmoqda… chiqarildi: ${removed}`);if(j.done)break;from=j.next}}
- out(`Tayyor.\nRo‘yxatda: ${all.length}\nYangi qo‘shildi: ${added}\nTasdiqlandi: ${verified}\nObuna bo‘lmagani uchun chiqarildi: ${removed}\nYangi kelgan (24 soat), keyingi safar tekshiriladi: ${kept}`)}catch(e){out('Xato: '+e.message)}};
-$('rst').onclick=async()=>{try{out(await call({action:'reset',nick:$('r').value}))}catch(e){out('Xato: '+e.message)}};
-$('stt').onclick=async()=>{try{const j=await call({action:'selftest'}),n={create:'Yozuv yaratish',secondCreateBlocked:'Ikkinchi marta yaratishni to‘sish',read:'O‘qish',matchWrite:'Mos yozish',staleWriteBlocked:'Eskirgan yozishni to‘sish',readAfterWrite:'Yozgandan keyin darhol o‘qish',list:'Ro‘yxat olish',delete:'O‘chirish'};out((j.ok?'HAMMASI TO‘G‘RI ISHLAYAPTI ✓\n\n':'MUAMMO BOR ✗\n\n')+Object.keys(n).map(k=>(j.checks[k]===true?'✓ ':'✗ ')+n[k]).join('\n')+(j.checks.error?'\n\nXato: '+j.checks.error:''))}catch(e){out('Xato: '+e.message)}};
-$('igB').onclick=async()=>{try{out(await call({action:'settings',ig:$('igN').value}))}catch(e){out('Xato: '+e.message)}};
-$('lvB').onclick=async()=>{try{out(await call({action:'level',nick:$('lvN').value,level:+$('lvL').value}))}catch(e){out('Xato: '+e.message)}};
-$('ftB').onclick=async()=>{try{out(await call({action:'featured',nick:$('ftN').value.trim()||undefined}))}catch(e){out('Xato: '+e.message)}};
-$('st').onclick=async()=>{try{out(await call({action:'stats'}))}catch(e){out('Xato: '+e.message)}};
-$('ex').onclick=async()=>{try{const j=await call({action:'export'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(j)],{type:'application/json'}));a.download='garaj-zaxira-'+new Date().toISOString().slice(0,10)+'.json';a.click();out('Zaxira tayyor: '+j.count+' ta mashina')}catch(e){out('Xato: '+e.message)}};
+async function readNicks(){
+  const files=[...$('f').files];if(!files.length){say('Avval followers_1.json faylini tanlang','bad');return null}
+  const raw=[];for(const f of files)raw.push(...parseNicks(await f.text()));
+  const all=[...new Set(raw.map(x=>String(x).trim().toLowerCase().replace(/^@/,'')).filter(x=>/^[a-z0-9._]{2,30}$/.test(x)))];
+  if(!all.length){say('Fayldan hech qanday nik topilmadi','bad');return null}
+  return all;
+}
+async function uploadList(all){
+  const {sid}=await call({action:'sync-start'});let added=0,verified=0,removed=0,kept=0;const CH=200;
+  for(let i=0;i<all.length;i+=CH){const j=await call({action:'import',sid,nicks:all.slice(i,i+CH)});added+=j.added;verified+=j.verified;bar(0.7*Math.min(i+CH,all.length)/all.length)}
+  let from=0;for(;;){const j=await call({action:'sync-finish',sid,from});removed+=j.removed;kept+=j.kept;bar(0.7+0.3*(j.done?1:Math.min(0.95,(from+5)/Math.max(1,(Math.ceil(all.length/200)+10)))));if(j.done)break;from=j.next}
+  bar(1);return {added,verified,removed,kept};
+}
+$('up').onclick=async()=>{
+  const all=await readNicks();if(!all)return;
+  if(all.length<50&&!confirm('Ro‘yxatda atigi '+all.length+' ta nik bor. Qolgan hamma odam turargohdan chiqariladi. Davom etasizmi?'))return;
+  busy(true);say('Yuklanmoqda… oynani yopmang','warn');
+  try{const r=await uploadList(all);const s=await refresh();
+    say('✓ Tayyor! Ro‘yxatda: '+fmt(all.length)+' ta. Yangi qo‘shildi: '+fmt(r.added)+'. Avvaldan bor edi: '+fmt(r.verified)+'. Obuna bo‘lmagani uchun chiqarildi: '+fmt(r.removed)+(r.kept?'. Yangi kelgan, ertaga tekshiriladi: '+fmt(r.kept):'')+'.'+(s.holes?' Diqqat: '+fmt(s.holes)+' ta bo‘sh joy bor, "Tozalab qayta yuklash" ni bosing.':''),s.holes?'warn':'ok')}
+  catch(e){say('Xato: '+e.message+'. Qayta bosib ko‘ring, hech narsa buzilmaydi.','bad')}finally{busy(false)}
+};
+$('fix').onclick=async()=>{
+  const all=await readNicks();if(!all)return;
+  if(!confirm('Hamma narsa o‘chiriladi va ro‘yxat noldan yuklanadi ('+fmt(all.length)+' ta nik). Sinov ma’lumotlari yo‘qoladi. Davom etasizmi?'))return;
+  busy(true);say('Tozalanmoqda… oynani yopmang','warn');
+  try{let left=1,d=0;while(left>0){const j=await call({action:'wipe',confirm:'HAMMASINI_OCHIR'});d+=j.deleted;left=j.left;say('Tozalanmoqda… '+fmt(d)+' ta o‘chirildi','warn')}
+    say('Yuklanmoqda…','warn');const r=await uploadList(all);const s=await refresh();
+    say('✓ Tayyor! Turargohda '+fmt(s.next)+' ta joy, hammasi to‘la ('+fmt(s.holes)+' ta bo‘sh). Yangi qo‘shildi: '+fmt(r.added)+'.',s.holes?'warn':'ok')}
+  catch(e){say('Xato: '+e.message+'. Tugmani qayta bosing.','bad')}finally{busy(false)}
+};
+$('wp').onclick=async()=>{
+  const w=prompt('Hammasi o‘chadi! Davom etish uchun aynan shuni yozing: HAMMASINI_OCHIR');if(w!=='HAMMASINI_OCHIR'){say('Bekor qilindi','warn');return}
+  busy(true);try{let left=1,d=0;while(left>0){const j=await call({action:'wipe',confirm:'HAMMASINI_OCHIR'});d+=j.deleted;left=j.left;say('O‘chirilmoqda… '+fmt(d)+' ta','warn')}await refresh();say('✓ Hammasi o‘chirildi. Endi ro‘yxatni yuklang.')}catch(e){say('Xato: '+e.message,'bad')}finally{busy(false)}
+};
+$('igB').onclick=async()=>{busy(true);try{await call({action:'settings',ig:$('igN').value});say('✓ Saqlandi: @'+$('igN').value.replace(/^@/,''))}catch(e){say(e.message,'bad')}finally{busy(false)}};
+$('rB').onclick=async()=>{busy(true);try{await call({action:'reset',nick:$('rN').value});say('✓ @'+$('rN').value.replace(/^@/,'')+' uchun PIN o‘chirildi. U yangi PIN o‘rnata oladi, mashinasi saqlanib qoladi.')}catch(e){say(e.message,'bad')}finally{busy(false)}};
+$('lB').onclick=async()=>{busy(true);try{await call({action:'level',nick:$('lN').value,level:+$('lL').value});say('✓ Podium berildi')}catch(e){say(e.message,'bad')}finally{busy(false)}};
+$('fB').onclick=async()=>{busy(true);try{const n=$('fN').value.trim();const j=await call({action:'featured',nick:n||undefined});say(n?'✓ Bugungi kun mashinasi: @'+n.replace(/^@/,''):'✓ Endi kun mashinasi avtomatik tanlanadi')}catch(e){say(e.message,'bad')}finally{busy(false)}};
+$('stt').onclick=async()=>{busy(true);try{const j=await call({action:'selftest'});const n={create:'Yozuv yaratish',secondCreateBlocked:'Ikkinchi marta yaratishni to‘sish',read:'O‘qish',matchWrite:'Mos yozish',staleWriteBlocked:'Eskirgan yozishni to‘sish',readAfterWrite:'Yozgandan keyin darhol o‘qish',list:'Ro‘yxat olish',delete:'O‘chirish'};say((j.ok?'✓ Hammasi to‘g‘ri ishlayapti':'✗ Muammo bor')+'\n'+Object.keys(n).map(k=>(j.checks[k]===true?'✓ ':'✗ ')+n[k]).join('\n'),j.ok?'ok':'bad');$('msg').firstChild.style.whiteSpace='pre-line'}catch(e){say(e.message,'bad')}finally{busy(false)}};
+$('ex').onclick=async()=>{busy(true);try{const j=await call({action:'export'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(j)],{type:'application/json'}));a.download='garaj-zaxira-'+new Date().toISOString().slice(0,10)+'.json';a.click();say('✓ Zaxira tayyor: '+fmt(j.count)+' ta mashina')}catch(e){say(e.message,'bad')}finally{busy(false)}};
 </script></body></html>
