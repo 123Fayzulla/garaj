@@ -143,6 +143,14 @@ html,body{height:100%;overflow:hidden}
 .modal{padding-bottom:84px}
 body,#lotApp,#garage .wrap{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,.code{-webkit-user-select:text;user-select:text}
+/* tor ekranli telefonlar (320–360px): yuqori panel o'ngga chiqib ketmasin */
+#top{grid-template-columns:minmax(0,1fr)}
+.brandbar{flex-wrap:wrap;row-gap:2px}
+.brandbar b{font-size:20px}
+#top .row>*{min-width:0}
+#top .row .btn{padding-left:14px;padding-right:14px;flex:none}
+.selcard{max-width:calc(100vw - 20px)}
+.selbtns .btn{min-width:0}
 </style>
 </head>
 <body>
