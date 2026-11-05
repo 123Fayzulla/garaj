@@ -1110,7 +1110,7 @@ function c3RealGet(bi,mi){
  if(typeof fetch!=="function"||typeof DEMO!=="undefined"&&DEMO)return null;
  var b=BRANDS[bi],md=b&&b.models[mi];if(!md)return null;var k=b.name+"|"+md[0],f=REAL_FILES[k];if(!f)return null;
  if(REAL_DATA[k])return REAL_DATA[k];
- if(!REAL_STATE[k]){REAL_STATE[k]=1;fetch(f).then(function(r){if(!r.ok)throw 0;if(/\.gz$/.test(f)){if(typeof DecompressionStream!=="function")throw 0;return new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();}return r.arrayBuffer();}).then(function(buf){REAL_DATA[k]=CR_parse(buf);REAL_DATA[k].key=k;if(window.onRealModel)window.onRealModel(bi,mi);}).catch(function(){REAL_STATE[k]=2;});}
+ if(!REAL_STATE[k]){REAL_STATE[k]=1;fetch(f).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();}).then(function(buf){var u=new Uint8Array(buf,0,2);if(u[0]===0x1f&&u[1]===0x8b){if(typeof DecompressionStream!=="function")throw 0;return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();}return buf;}).then(function(buf){REAL_DATA[k]=CR_parse(buf);REAL_DATA[k].key=k;if(window.onRealModel)window.onRealModel(bi,mi);}).catch(function(e){REAL_STATE[k]=2;if(window.console)console.warn("3D model yuklanmadi:",f,e);});}
  return null;
 }
 var CR_VS="precision highp float;attribute vec3 aP;attribute vec3 aN;uniform mat4 uVP;uniform mat4 uM;uniform vec3 uMin;uniform vec3 uRng;varying vec3 vP;varying vec3 vN;varying vec3 vO;"+
