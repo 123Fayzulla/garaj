@@ -233,7 +233,7 @@ function makeApi(store, env = {}) {
       return { ok: true, deleted: batch.length, left };
     }
     if (body.action === "sync-finish") {        // bugungi ro‘yxatda yo‘qlarni chiqarib yuborish (bo‘laklab, vaqt chegarasiga sig‘ishi uchun)
-      const sid = +body.sid, from = Math.max(0, body.from | 0), STEP = 5, GRACE = 24 * 3600e3;
+      const sid = +body.sid, from = Math.max(0, body.from | 0), STEP = 5, GRACE = body.strict ? 0 : 24 * 3600e3;
       const sy = (await store.meta.get("sync"))?.data; if (!sid || !sy || sy.sid !== sid) throw new HttpError(400, "Sinxronlash sessiyasi topilmadi");
       const K = Math.ceil(((await config()).next || 0) / CHUNK); let removed = 0, kept = 0;
       for (let k = from; k < Math.min(K, from + STEP); k++) {
@@ -248,6 +248,34 @@ function makeApi(store, env = {}) {
         }
       }
       const next = from + STEP; return { ok: true, removed, kept, next: next < K ? next : null, done: next >= K };
+    }
+    if (body.action === "compact") {      // bo‘sh kataklarni olib tashlab, mashinalarni zich joylashtiradi (bo‘laklab)
+      const phase = body.phase === "chunks" ? "chunks" : "users", from = Math.max(0, body.from | 0), LIM = 120;
+      const cfg = await config(), n0 = cfg.next || 0, K = Math.ceil(n0 / CHUNK);
+      if (K > 120) throw new HttpError(400, "Zichlash 24 000 tagacha mashinada ishlaydi");
+      const E = [];
+      for (let k = 0; k < K; k += 20) {
+        const part = await Promise.all(Array.from({ length: Math.min(20, K - k) }, (_, i) => chunkData(k + i, true)));
+        part.forEach((arr, i) => arr.forEach((e, j) => e && E.push([(k + i) * CHUNK + j, e])));
+      }
+      const m = E.length, holes = n0 - m;
+      if (holes <= 0) return { ok: true, holes: 0, done: true, total: m };
+      if (phase === "users") {
+        const mv = []; E.forEach(([old, e], j) => { if (old !== j) mv.push([e[0], j]); });
+        const part = mv.slice(from, from + LIM);
+        for (let i = 0; i < part.length; i += 40) await Promise.all(part.slice(i, i + 40).map(([nick, j]) => cas(store.users, nick, (d) => { d.p = j; return d; }, () => ({}))));
+        const next = from + LIM;
+        return { ok: true, holes, done: false, nextPhase: next < mv.length ? "users" : "chunks", next: next < mv.length ? next : 0 };
+      }
+      const newK = Math.ceil(m / CHUNK);
+      for (let c = 0; c < newK; c++) { const arr = E.slice(c * CHUNK, (c + 1) * CHUNK).map(([, e]) => e); while (arr.length < CHUNK) arr.push(null); await store.lot.put("c" + c, arr, {}); }
+      for (let c = newK; c < K; c++) await store.lot.del("c" + c);
+      await cas(store.meta, "config", (c) => { c.next = m; return c; }, () => ({}));
+      for (const key of ["daily", "featured"]) {      // kun mashinasining joyi ham yangilanadi
+        const d = (await store.meta.get(key))?.data;
+        if (d && d.nick) { const r = await store.users.get(d.nick); if (r && r.data.p != null) await store.meta.put(key, { ...d, p: r.data.p }, {}); else await store.meta.del(key); }
+      }
+      return { ok: true, holes, done: true, total: m };
     }
     if (body.action === "reset") {
       const nick = normNick(body.nick); if (!nick) throw new HttpError(400, "Nik noto’g’ri");

@@ -37,7 +37,7 @@ hr{border:0;border-top:1px solid #5b4684;margin:14px 0}a{color:#ffd27a}
       <div><b id="nChosen">–</b><span>o‘zi tanlaganlar</span></div>
       <div><b id="nHoles">–</b><span>bo‘sh joy</span></div>
     </div>
-    <div id="holeWarn" class="warn" hidden><b>Bo‘sh joylar bor.</b> Turargohda mashinasiz katakchalar ko‘rinadi. Pastdagi <b>"Tozalab qayta yuklash"</b> tugmasi bilan tuzating.</div>
+    <div id="holeWarn" class="warn" hidden><b>Turargohda bo‘sh kataklar bor</b> (obuna bo‘lmaganlar chiqarilgan joylar). Ro‘yxatni yuklaganingizda ular o‘zi tuzatiladi. Hozir tuzatish uchun:<br><button id="cmp">Joylarni zichlash</button></div>
     <button class="ghost" id="refresh">Yangilash</button>
   </section>
 
@@ -45,9 +45,9 @@ hr{border:0;border-top:1px solid #5b4684;margin:14px 0}a{color:#ffd27a}
     <h2>2. Har kungi ish: obunachilar ro‘yxati</h2>
     <p class="hint">Instagram'dan yuklab olgan <b>followers_1.json</b> faylini tanlang (bir nechta bo‘lsa, hammasini birga). Keyin tugmani bosing. Yangi obunachilar qo‘shiladi, obunani bekor qilganlar chiqariladi.</p>
     <input id="f" type="file" accept=".json,application/json" multiple>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:8px 0"><input id="strict" type="checkbox" checked style="width:24px;height:24px;margin-top:2px"><span>Obuna bo‘lmaganlarni <b>darhol</b> chiqarish (kutmasdan). O‘chirilsa, yangi kelganlarga 1 kun muhlat beriladi.</span></label>
     <button class="big" id="up">Ro‘yxatni yuklash</button>
     <div class="prog" id="prog"><i></i></div>
-    <button class="big red" id="fix" hidden>Tozalab qayta yuklash</button>
   </section>
 
   <details class="card">
@@ -78,6 +78,7 @@ hr{border:0;border-top:1px solid #5b4684;margin:14px 0}a{color:#ffd27a}
     <summary>Xavfli amallar</summary>
     <p class="hint">Hamma obunachi, mashina va PINlar o‘chadi. Faqat sinov ma’lumotlarini tozalash uchun.</p>
     <button id="wp" class="red">Hammasini o‘chirish</button>
+    <button id="fix" class="red">Hammasini o‘chirib, ro‘yxatni qayta yuklash</button>
   </details>
 </main>
 
@@ -87,13 +88,13 @@ let KEY='';
 function say(text,kind){const d=document.createElement('div');d.className=kind||'ok';d.textContent=text;$('msg').replaceChildren(d);if(kind!=='bad')window.scrollTo({top:0,behavior:'smooth'})}
 async function call(b,tries=3){let last;for(let t=0;t<tries;t++){try{const r=await fetch('/api/admin',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:KEY,...b})});let j;try{j=await r.json()}catch(e){throw new Error('Server javob bermadi ('+r.status+')')}if(!r.ok){const e=new Error(j.error||('Xato '+r.status));e.code=r.status;throw e}return j}catch(e){last=e;if(e.code&&e.code<500)throw e;await new Promise(r=>setTimeout(r,800*(t+1)))}}throw last}
 function bar(p){const b=$('prog');b.style.display='block';b.firstElementChild.style.width=Math.round(p*100)+'%'}
-function busy(on){['up','fix','wp','stt','ex','igB','rB','lB','fB','refresh'].forEach(i=>{const e=$(i);if(e)e.disabled=on})}
+function busy(on){['up','fix','wp','cmp','stt','ex','igB','rB','lB','fB','refresh'].forEach(i=>{const e=$(i);if(e)e.disabled=on})}
 const fmt=n=>Number(n).toLocaleString('ru-RU');
 
 async function refresh(){
   const j=await call({action:'stats'});const next=(j.config&&j.config.next)||0,real=j.total||0,holes=Math.max(0,next-real);
   $('nSlots').textContent=fmt(next);$('nReal').textContent=fmt(real);$('nChosen').textContent=fmt(j.claimed||0);$('nHoles').textContent=fmt(holes);
-  $('nHoles').style.color=holes>0?'#ff9d8a':'#ffd27a';$('holeWarn').hidden=!holes;$('fix').hidden=!holes;
+  $('nHoles').style.color=holes>0?'#ff9d8a':'#ffd27a';$('holeWarn').hidden=!holes;
   return {next,real,holes};
 }
 async function login(silent){
@@ -104,8 +105,10 @@ async function login(silent){
 $('go').onclick=()=>login(false);$('k').onkeydown=e=>{if(e.key==='Enter')login(false)};
 try{const s=localStorage.getItem('gk');if(s){$('k').value=s;login(true)}}catch(e){}
 $('out').onclick=()=>{try{localStorage.removeItem('gk')}catch(e){}location.reload()};
+$('cmp').onclick=async()=>{busy(true);try{say('Zichlanmoqda…','warn');await compactAll();const s=await refresh();say('✓ Bo‘sh joylar tuzatildi. Turargohda '+fmt(s.next)+' ta mashina.')}catch(e){say('Xato: '+e.message,'bad')}finally{busy(false)}};
 $('refresh').onclick=async()=>{try{await refresh();say('Yangilandi')}catch(e){say(e.message,'bad')}};
 
+async function compactAll(){let ph='users',from=0,last;for(let n=0;n<80;n++){last=await call({action:'compact',phase:ph,from});if(last.done)return last;ph=last.nextPhase;from=last.next||0}return last}
 function parseNicks(text){try{const j=JSON.parse(text),out=[];(function w(x){if(Array.isArray(x))x.forEach(w);else if(x&&typeof x==='object'){if(Array.isArray(x.string_list_data))x.string_list_data.forEach(s=>{if(s.value)out.push(s.value);else if(s.href)out.push(s.href.split('/').filter(Boolean).pop())});else Object.values(x).forEach(w)}})(j);if(out.length)return out}catch(e){}return text.split(/[\s,;]+/).filter(Boolean)}
 async function readNicks(){
   const files=[...$('f').files];if(!files.length){say('Avval followers_1.json faylini tanlang','bad');return null}
@@ -117,15 +120,15 @@ async function readNicks(){
 async function uploadList(all){
   const {sid}=await call({action:'sync-start'});let added=0,verified=0,removed=0,kept=0;const CH=200;
   for(let i=0;i<all.length;i+=CH){const j=await call({action:'import',sid,nicks:all.slice(i,i+CH)});added+=j.added;verified+=j.verified;bar(0.7*Math.min(i+CH,all.length)/all.length)}
-  let from=0;for(;;){const j=await call({action:'sync-finish',sid,from});removed+=j.removed;kept+=j.kept;bar(0.7+0.3*(j.done?1:Math.min(0.95,(from+5)/Math.max(1,(Math.ceil(all.length/200)+10)))));if(j.done)break;from=j.next}
+  let from=0;for(;;){const j=await call({action:'sync-finish',sid,from,strict:$('strict').checked});removed+=j.removed;kept+=j.kept;bar(0.7+0.3*(j.done?1:Math.min(0.95,(from+5)/Math.max(1,(Math.ceil(all.length/200)+10)))));if(j.done)break;from=j.next}
   bar(1);return {added,verified,removed,kept};
 }
 $('up').onclick=async()=>{
   const all=await readNicks();if(!all)return;
   if(all.length<50&&!confirm('Ro‘yxatda atigi '+all.length+' ta nik bor. Qolgan hamma odam turargohdan chiqariladi. Davom etasizmi?'))return;
   busy(true);say('Yuklanmoqda… oynani yopmang','warn');
-  try{const r=await uploadList(all);const s=await refresh();
-    say('✓ Tayyor! Ro‘yxatda: '+fmt(all.length)+' ta. Yangi qo‘shildi: '+fmt(r.added)+'. Avvaldan bor edi: '+fmt(r.verified)+'. Obuna bo‘lmagani uchun chiqarildi: '+fmt(r.removed)+(r.kept?'. Yangi kelgan, ertaga tekshiriladi: '+fmt(r.kept):'')+'.'+(s.holes?' Diqqat: '+fmt(s.holes)+' ta bo‘sh joy bor, "Tozalab qayta yuklash" ni bosing.':''),s.holes?'warn':'ok')}
+  try{const r=await uploadList(all);let s=await refresh();let packed=0;if(s.holes>0){say('Bo‘sh joylar tuzatilmoqda… oynani yopmang','warn');packed=s.holes;await compactAll();s=await refresh()}
+    say('✓ Tayyor! Ro‘yxatda: '+fmt(all.length)+' ta. Yangi qo‘shildi: '+fmt(r.added)+'. Avvaldan bor edi: '+fmt(r.verified)+'. Obuna bo‘lmagani uchun chiqarildi: '+fmt(r.removed)+(r.kept?'. Yangi kelgan, ertaga tekshiriladi: '+fmt(r.kept):'')+'. Turargohda hozir '+fmt(s.next)+' ta mashina'+(packed?' (bo‘sh joylar tuzatildi)':'')+'.',s.holes?'warn':'ok')}
   catch(e){say('Xato: '+e.message+'. Qayta bosib ko‘ring, hech narsa buzilmaydi.','bad')}finally{busy(false)}
 };
 $('fix').onclick=async()=>{
