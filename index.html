@@ -348,7 +348,8 @@ var BRANDS=[
   ["Chiron","mid",4544,1212,2711,{R:350,spoiler:1,s:100}],
   ["Veyron","mid",4462,1159,2710,{R:345,s:98}],
   ["Divo","mid",4641,1212,2711,{R:350,spoiler:1,s:95}],
-  ["Tourbillon","mid",4671,1189,2797,{R:350,s:97}]]}
+  ["Tourbillon","mid",4671,1189,2797,{R:350,s:97}],
+  ["Bolide","mid",4756,995,2750,{R:340,spoiler:1,s:96}]]}
  ,{id:"koenigsegg",pop:89,name:"Koenigsegg",lamp:"blade",tail:"round",wheel:{n:10,style:"ten"},cal:"#f0a000",models:[
   ["Jesko","mid",4610,1210,2700,{R:340,spoiler:1,s:100}],["Regera","mid",4560,1110,2662,{R:340,s:96}],["Agera RS","mid",4293,1120,2662,{R:335,spoiler:1,s:97}]]}
  ,{id:"pagani",pop:88,name:"Pagani",lamp:"round",tail:"round",wheel:{n:10,style:"ten"},cal:"#c22",models:[
@@ -1098,7 +1099,7 @@ function c3PaintU(g,u,m,s,o){
 }
 
 /* ===== Haqiqiy 3D modellar (CAR1): yuklash va chizish. Model hali yuklanmagan bo'lsa, kod bilan chizilgan mashina ko'rsatiladi ===== */
-var REAL_FILES={"Toyota|Supra":"models/supra.car.gz","BMW|M5":"models/m5.car.gz","Lamborghini|Veneno":"models/veneno.car.gz","Chevrolet|Damas":"models/damas.car.gz","Chevrolet|Cobalt":"models/cobalt.car.gz","Chevrolet|Gentra":"models/gentra.car.gz","Chevrolet|Spark":"models/spark.car.gz","Chevrolet|Malibu":"models/malibu.car.gz","Chevrolet|Tracker":"models/tracker.car.gz","Rolls-Royce|Silver Cloud":"models/silvercloud.car.gz"};
+var REAL_FILES={"Ferrari|F40":"models/f40.car.gz","Bugatti|Veyron":"models/veyron.car.gz","Mercedes-Benz|AMG G 63":"models/g63.car.gz","Bugatti|Chiron":"models/chiron.car.gz","Ferrari|296 GTB":"models/f296.car.gz","BMW|M4":"models/m4.car.gz","Bugatti|Bolide":"models/bolide.car.gz","Ferrari|F8 Tributo":"models/f8.car.gz","Mercedes-Benz|EQS":"models/eqs.car.gz","Rolls-Royce|Phantom":"models/phantom.car.gz","Rolls-Royce|Spectre":"models/spectre.car.gz","BMW|M8":"models/m8.car.gz","BMW|XM":"models/xm.car.gz","Porsche|911":"models/p911.car.gz","Porsche|911 Turbo S":"models/p911ts.car.gz","Lamborghini|Huracán":"models/huracan.car.gz","Mercedes-Benz|Maybach S-Class":"models/maybach.car.gz","Toyota|Supra":"models/supra.car.gz","BMW|M5":"models/m5.car.gz","Lamborghini|Veneno":"models/veneno.car.gz","Chevrolet|Damas":"models/damas.car.gz","Chevrolet|Cobalt":"models/cobalt.car.gz","Chevrolet|Gentra":"models/gentra.car.gz","Chevrolet|Spark":"models/spark.car.gz","Chevrolet|Malibu":"models/malibu.car.gz","Chevrolet|Tracker":"models/tracker.car.gz","Rolls-Royce|Silver Cloud":"models/silvercloud.car.gz"};
 var REAL_DATA={},REAL_STATE={};
 function CR_parse(buf){
  var dv=new DataView(buf);if(dv.getUint32(0,true)!==0x31524143)throw new Error("not CAR1");

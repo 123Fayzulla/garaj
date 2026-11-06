@@ -1,7 +1,7 @@
 // AVTOMATIK YARATILGAN (build.py). Tahrirlash uchun server/ papkasidagi fayllarni o‘zgartiring.
 import { getStore } from "@netlify/blobs";
 // Avtomatik yaratilgan (build.py) — katalog hajmlari
-const MODEL_COUNTS = [11, 3, 7, 4, 5, 6, 4, 4, 3, 3, 3, 4, 3, 4, 7, 6, 2, 6, 3, 3, 3, 13, 13, 8, 7, 3, 5, 7, 4, 2, 3, 2, 2, 8, 2, 2, 4, 3, 6, 7, 10, 5, 4, 3, 3];
+const MODEL_COUNTS = [11, 3, 7, 4, 5, 6, 4, 4, 3, 3, 3, 4, 3, 4, 7, 6, 2, 6, 3, 3, 3, 13, 13, 8, 7, 3, 5, 7, 4, 2, 3, 2, 2, 8, 2, 2, 4, 3, 6, 7, 10, 5, 5, 3, 3];
 const COLOR_COUNT = 8;
 const FINISH_COUNT = 3;
 const RIM_COUNT = 4;
