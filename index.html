@@ -2317,11 +2317,12 @@ function tick(now){
  /* kamera: mashina ortida; barmoq bilan surilsa atrofga/tepaga/pastga qaraydi, qo‘yib yuborilsa asta qaytadi */
  if(!DS.looking&&(DS.lookYaw||DS.lookPitch)&&now-DS.lookT>3500){var rk=Math.exp(-dt*3.2);DS.lookYaw*=rk;DS.lookPitch*=rk;if(Math.abs(DS.lookYaw)<.003&&Math.abs(DS.lookPitch)<.003)DS.lookYaw=DS.lookPitch=0;}
  S.camH+=wrapA(S.h-S.camH)*Math.min(1,dt*(3.6+sp*.02));
- var ca=S.camH+DS.lookYaw,back=7.2+Math.min(3,sp*.045),cx=Math.sin(ca),cz=Math.cos(ca),cam=[S.x-cx*back,0,S.z-cz*back];
+ var back=7.2+Math.min(3,sp*.045),cx=Math.sin(S.camH),cz=Math.cos(S.camH),cam=[S.x-cx*back,0,S.z-cz*back];
  var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
  DS.shake*=Math.pow(.02,dt);if(DS.shake>.02){cam[0]+=(Math.random()-.5)*DS.shake*.5;cam[1]+=(Math.random()-.5)*DS.shake*.5;}
  var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045);
- if(DS.lookPitch){var bx=tgt[0]-cam[0],by=tgt[1]-cam[1],bz=tgt[2]-cam[2],hl=Math.hypot(bx,bz)||1,L3=Math.hypot(hl,by),an=Math.atan2(by,hl)+DS.lookPitch;an=Math.max(-1.45,Math.min(1.45,an));tgt=[cam[0]+bx/hl*Math.cos(an)*L3,cam[1]+Math.sin(an)*L3,cam[2]+bz/hl*Math.cos(an)*L3];}
+ DS.fov=fov;
+ if(DS.lookPitch||DS.lookYaw){var bx=tgt[0]-cam[0],by=tgt[1]-cam[1],bz=tgt[2]-cam[2],hl=Math.hypot(bx,bz)||1,L3=Math.hypot(hl,by),an=Math.atan2(by,hl)+DS.lookPitch,a0=Math.atan2(bx,bz)+DS.lookYaw;an=Math.max(-1.45,Math.min(1.45,an));tgt=[cam[0]+Math.sin(a0)*Math.cos(an)*L3,cam[1]+Math.sin(an)*L3,cam[2]+Math.cos(a0)*Math.cos(an)*L3];}
  var dmn=Math.hypot(S.x-WLD.MC.x,S.z-WLD.MC.z),ek=Math.max(0,Math.min(1,(430-dmn)/250));ek=ek*ek*(3-2*ek);DS.ek=ek;
  resize3d();WLD.draw(cam,tgt,fov,ek,DS.t,dt);
  /* chang va tutun */
@@ -2336,11 +2337,13 @@ function tick(now){
 function drawCar(sp,vl){
  var S=DS.S,car=DS.car,W=window.innerWidth,H=window.innerHeight,land=W>H,cw=Math.min(W*(land?.46:.7),H*(land?.84:.62)),ch=cw/1.6;
  var el=$("drvCar");el.style.width=cw+"px";el.style.height=ch+"px";el.style.left=(W/2-cw/2+DS.steer*W*.012)+"px";el.style.top=(H*(land?.78:.64)-ch*.62)+"px";
- var dl=wrapA(S.h-S.camH-DS.lookYaw),az=Math.atan2(-Math.cos(dl),-Math.sin(dl));
+ var dl=wrapA(S.h-S.camH),az=Math.atan2(-Math.cos(dl),-Math.sin(dl));
  DS.cf++;
  if(DS.cf%2===0||Math.abs(dl)>.02||DS.cf<3){try{c3Render(DS.carSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:az,el:.3,seed:3,zoom:1.75,noFetch:true});}catch(e){}}
  var roll=-(DS.steer*Math.min(1,sp/30))*3.2-Math.max(-2,Math.min(2,vl*.2)),bump=Math.sin(DS.t*38)*Math.min(1.6,sp*.02);
- el.style.transform="translateY("+bump+"px) rotate("+roll+"deg)";el.style.opacity=String(Math.max(0,Math.min(1,1-(Math.abs(DS.lookPitch)-.3)/.25)));
+ var tv=Math.tan((DS.fov||1)/2),th=tv*(W/H),lyw=DS.lookYaw,lpt=DS.lookPitch,ox=0,oy=0,vis=1;
+ if(lyw||lpt){if(Math.abs(lyw)>1.3){vis=0;}else ox=Math.tan(lyw)/th*(W/2);oy=Math.tan(lpt)/tv*(H/2);if(Math.abs(lpt)>1.05)vis=0;}
+ el.style.transform="translate("+ox.toFixed(1)+"px,"+(oy+bump).toFixed(1)+"px) rotate("+roll+"deg)";el.style.opacity=String(vis);
 }
 function drawFx(sp){
  var c=DS.fxC||(DS.fxC=$("drvFx").getContext("2d")),W=$("drvFx").width,H=$("drvFx").height;c.clearRect(0,0,W,H);
