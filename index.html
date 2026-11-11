@@ -203,6 +203,17 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 @media (orientation:portrait){#ctlL{left:10px}.rb{width:84px;height:84px}.pd.gas{width:92px;height:128px}.pd.brk{width:82px;height:92px}}
 
 .hud-l{display:flex;gap:6px;pointer-events:auto}
+
+/* kichikroq boshqaruv, yozuvlar o‘ng tepada */
+.rb{width:72px;height:72px}.pd.gas{width:80px;height:112px}.pd.brk{width:68px;height:78px;font-size:13px}.pd{font-size:16px;border-radius:18px}
+#ctlL{gap:14px}#ctlR{gap:10px}
+#hMsg{left:auto;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);transform:none;font-size:15px;padding:6px 13px;border-width:2px;border-radius:16px;max-width:52vw;text-align:right;box-shadow:0 3px 0 #2a1a45}
+#hMap{top:calc(env(safe-area-inset-top,0px) + 62px)}
+@media (orientation:landscape){.rb{width:70px;height:70px}.pd.gas{width:82px;height:112px}.pd.brk{width:68px;height:80px}#hMsg{top:calc(env(safe-area-inset-top,0px) + 8px)}#hMap{top:calc(env(safe-area-inset-top,0px) + 62px)}}
+@media (orientation:portrait){.rb{width:62px;height:62px}.pd.gas{width:70px;height:98px}.pd.brk{width:62px;height:70px}}
+.rb::before{transform:scale(.8)}
+
+#drv{touch-action:none;-webkit-user-select:none;user-select:none}#drvCar{pointer-events:none}
 </style>
 </head>
 <body>
@@ -1173,12 +1184,21 @@ function CR_parse(buf){
  hdr.g.forEach(function(g){g.P=new Int16Array(buf,base+g.po,g.nv*3);g.N=new Int8Array(buf,base+g.no,g.nv*4);g.I=g.i32?new Uint32Array(buf,base+g.io,g.ni):new Uint16Array(buf,base+g.io,g.ni);});
  return hdr;
 }
+/* Modellar avval bepul CDN'dan (jsDelivr, GitHub'dan) yuklanadi, bu Netlify trafigini sarflamaydi.
+   CDN ishlamasa (masalan repozitoriy yopiq bo‘lsa), o‘z saytimizdan yuklanadi. */
+var REAL_CDN="https://cdn.jsdelivr.net/gh/123Fayzulla/garaj@main/";
+function realFetch(f){
+ var cdnOK=true;try{cdnOK=sessionStorage.getItem("cg.cdn")!=="0";}catch(e){}
+ function local(){return fetch(f).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();});}
+ if(!cdnOK)return local();
+ return fetch(REAL_CDN+f).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();}).catch(function(){try{sessionStorage.setItem("cg.cdn","0");}catch(e){}return local();});
+}
 function c3RealPeek(bi,mi){var b=BRANDS[bi],md=b&&b.models[mi];return md?(REAL_DATA[b.name+"|"+md[0]]||null):null;}
 function c3RealGet(bi,mi){
  if(typeof fetch!=="function"||typeof DEMO!=="undefined"&&DEMO&&!window.__VIDEO)return null;
  var b=BRANDS[bi],md=b&&b.models[mi];if(!md)return null;var k=b.name+"|"+md[0],f=REAL_FILES[k];if(!f)return null;
  if(REAL_DATA[k])return REAL_DATA[k];
- if(!REAL_STATE[k]){REAL_STATE[k]=1;fetch(f).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();}).then(function(buf){var u=new Uint8Array(buf,0,2);if(u[0]===0x1f&&u[1]===0x8b){if(typeof DecompressionStream!=="function")throw 0;return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();}return buf;}).then(function(buf){REAL_DATA[k]=CR_parse(buf);REAL_DATA[k].key=k;if(window.onRealModel)window.onRealModel(bi,mi);}).catch(function(e){REAL_STATE[k]=2;if(window.console)console.warn("3D model yuklanmadi:",f,e);});}
+ if(!REAL_STATE[k]){REAL_STATE[k]=1;realFetch(f).then(function(buf){var u=new Uint8Array(buf,0,2);if(u[0]===0x1f&&u[1]===0x8b){if(typeof DecompressionStream!=="function")throw 0;return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();}return buf;}).then(function(buf){REAL_DATA[k]=CR_parse(buf);REAL_DATA[k].key=k;if(window.onRealModel)window.onRealModel(bi,mi);}).catch(function(e){REAL_STATE[k]=2;if(window.console)console.warn("3D model yuklanmadi:",f,e);});}
  return null;
 }
 var CR_VS="precision highp float;attribute vec3 aP;attribute vec3 aN;uniform mat4 uVP;uniform mat4 uM;uniform vec3 uMin;uniform vec3 uRng;varying vec3 vP;varying vec3 vN;varying vec3 vO;"+
@@ -1706,7 +1726,7 @@ var WLD=(function(){
   /* ===== chizish (WebGL) ===== */
  var ENVS={
   day:{zen:[.2,.46,.86],hor:[.82,.9,.98],sun:[-.45,.72,.5],sunCol:[1.05,.98,.86],sky:[.5,.6,.78],gnd:[.3,.27,.2],fog:[.8,.88,.96],fogS:240,fogL:2000,cloud:[1,1,1],water:[.08,.32,.42]},
-  dusk:{zen:[.16,.12,.4],hor:[1,.6,.36],sun:[-.8,.16,.58],sunCol:[1.1,.62,.34],sky:[.45,.36,.52],gnd:[.3,.2,.2],fog:[.95,.62,.5],fogS:160,fogL:2200,cloud:[1,.72,.62],water:[.1,.18,.3]}
+  dusk:{zen:[.18,.14,.44],hor:[1,.62,.38],sun:[-.8,.2,.58],sunCol:[1.2,.72,.4],sky:[.68,.54,.62],gnd:[.46,.36,.32],fog:[.95,.62,.5],fogS:160,fogL:2200,cloud:[1,.72,.62],water:[.1,.18,.3]}
  };
  W.ENVS=ENVS;
  var _eb=null;
@@ -1879,11 +1899,11 @@ function makeOrbit(cv,active,getCar,seedFn){
  o.raf=requestAnimationFrame(loop);return o;
 }
 var spriteSt=null,spriteTried=false;
-function spriteGL(car){
+function spriteGL(car,fx){
  if(!GLOK)return null;
  if(!spriteSt&&!spriteTried){spriteTried=true;try{var c=document.createElement("canvas");c.width=380;c.height=212;spriteSt=c3Init(c);}catch(e){spriteSt=null;}}
  if(!spriteSt)return null;
- try{c3Render(spriteSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:.8,el:.1,seed:3,zoom:1.3});return spriteSt.gl.canvas;}catch(e){spriteSt=null;return null;}
+ try{c3Render(spriteSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:.8,el:.1,seed:3,zoom:1.3,noFetch:!fx});return spriteSt.gl.canvas;}catch(e){spriteSt=null;return null;}
 }
 
 /* ===================== TURARGOH ===================== */
@@ -1902,7 +1922,7 @@ function sprite(car){
 }
 window.onRealModel=function(bi,mi){var p=bi+"."+mi+".";[LOT.spr,LOT.hiSpr].forEach(function(m){if(m)Array.from(m.keys()).forEach(function(k){if(k.indexOf(p)===0)m.delete(k);});});LOT.dirty=true;if(window.__redraw3d)window.__redraw3d();};
 function spriteHi(car){var k=code(car),m=LOT.hiSpr||(LOT.hiSpr=new Map()),s=m.get(k);if(s){m.delete(k);m.set(k,s);}return s||null;}
-function makeHi(car){var k=code(car),cv=document.createElement("canvas");cv.width=380;cv.height=212;var im=spriteGL(car);if(!im)return null;cv.getContext("2d").drawImage(im,0,0);var m=LOT.hiSpr||(LOT.hiSpr=new Map());m.set(k,cv);if(m.size>36)m.delete(m.keys().next().value);return cv;}
+function makeHi(car){var k=code(car),cv=document.createElement("canvas");cv.width=380;cv.height=212;var im=spriteGL(car,true);if(!im)return null;cv.getContext("2d").drawImage(im,0,0);var m=LOT.hiSpr||(LOT.hiSpr=new Map());m.set(k,cv);if(m.size>36)m.delete(m.keys().next().value);return cv;}
 function makeSprite(car){
  var k=code(car),cv=document.createElement("canvas");cv.width=160;cv.height=89;var c=cv.getContext("2d");
  var im=spriteGL(car);if(im)c.drawImage(im,0,0,160,89);else{var s=getSpec(car.b,car.m),kk=142/s.L;drawCar(c,s,{ox:9,gy:74,k:kk,color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],seed:3});}
@@ -1957,7 +1977,7 @@ function lotDraw(now){
    if(ssy-shh*2.2<H&&ssy>-40&&ssx>-sw&&ssx<W+sw){
     c.globalAlpha=.95;c.drawImage(beam(),ssx-sw*.95,ssy-shh*2.3,sw*1.9,shh*2.25);c.drawImage(beam(),ssx-sw*1.25,ssy-shh*2.0,sw*.9,shh*2);c.drawImage(beam(),ssx+sw*.35,ssy-shh*2.0,sw*.9,shh*2);c.globalAlpha=1;
     var spw=sw*1.35,sph=spw*110/256;c.drawImage(plat(2),ssx-spw/2,ssy-sph*.46+shh*.06,spw,sph);c.drawImage(plat(2),ssx-spw*.4,ssy-sph*.42,spw*.8,sph*.8);
-    var hk2=code(fc);if(!LOT.hiF||LOT.hiF.k!==hk2){var g3=spriteGL(fc);if(g3){var hc2=document.createElement("canvas");hc2.width=380;hc2.height=212;hc2.getContext("2d").drawImage(g3,0,0);LOT.hiF={k:hk2,c:hc2};}}
+    var hk2=code(fc);if(!LOT.hiF||LOT.hiF.k!==hk2){var g3=spriteGL(fc,true);if(g3){var hc2=document.createElement("canvas");hc2.width=380;hc2.height=212;hc2.getContext("2d").drawImage(g3,0,0);LOT.hiF={k:hk2,c:hc2};}}
     var fimg=LOT.hiF&&LOT.hiF.k===hk2?LOT.hiF.c:sprite(fc);if(fimg)c.drawImage(fimg,ssx-sw/2,ssy-shh*.86,sw,shh);
     var fs2=Math.max(12,Math.min(26,ssc*.9));c.font='400 '+fs2+'px "Lilita One","Nunito",system-ui,sans-serif';c.textAlign="center";c.textBaseline="middle";
     var t1="★ KUN MASHINASI ★",t2="@"+LOT.feat.nick,w1=c.measureText(t1).width+fs2*1.6,y1=ssy-shh*1.05;
@@ -1965,7 +1985,7 @@ function lotDraw(now){
     c.font='400 '+(fs2*.8)+'px "Lilita One","Nunito",system-ui,sans-serif';var w2=c.measureText(t2).width+fs2*1.2;c.fillStyle="#fff1d6";c.beginPath();if(c.roundRect)c.roundRect(ssx-w2/2,ssy+sph*.35,w2,fs2*1.3,fs2*.65);else c.rect(ssx-w2/2,ssy+sph*.35,w2,fs2*1.3);c.fill();c.stroke();c.fillStyle="#2a1a45";c.fillText(t2,ssx,ssy+sph*.35+fs2*.68);
     LOT.hit.push([ssx,ssy,sw,shh,LOT.feat.p]);}}}
  /* tanlangan mashina doim ustida */
- if(selD){var S=selD,sc0=carOf(LOT.sel),hk=sc0?code(sc0):"";if(sc0&&(!LOT.hi||LOT.hi.k!==hk)){var hc=document.createElement("canvas");hc.width=380;hc.height=212;var gim=spriteGL(sc0);if(gim){hc.getContext("2d").drawImage(gim,0,0);LOT.hi={k:hk,c:hc};}}if(LOT.hi&&LOT.hi.k===hk)S[4]=LOT.hi.c;c.strokeStyle="#ffd27a";c.lineWidth=Math.max(2,S[5]*.1);c.beginPath();c.ellipse(S[0],S[1]-S[3]*.04,S[2]*.6,S[3]*.2,0,0,6.2832);c.stroke();if(S[4])c.drawImage(S[4],S[0]-S[2]/2,S[1]-S[3]*.82,S[2],S[3]);}
+ if(selD){var S=selD,sc0=carOf(LOT.sel),hk=sc0?code(sc0):"";if(sc0&&(!LOT.hi||LOT.hi.k!==hk)){var hc=document.createElement("canvas");hc.width=380;hc.height=212;var gim=spriteGL(sc0,true);if(gim){hc.getContext("2d").drawImage(gim,0,0);LOT.hi={k:hk,c:hc};}}if(LOT.hi&&LOT.hi.k===hk)S[4]=LOT.hi.c;c.strokeStyle="#ffd27a";c.lineWidth=Math.max(2,S[5]*.1);c.beginPath();c.ellipse(S[0],S[1]-S[3]*.04,S[2]*.6,S[3]*.2,0,0,6.2832);c.stroke();if(S[4])c.drawImage(S[4],S[0]-S[2]/2,S[1]-S[3]*.82,S[2],S[3]);}
  labels.forEach(drawLabel);
  function drawLabel(L){var it=LOT.items[L[2]],car=carOf(L[2]),sel=L[2]===LOT.sel,ft=LOT.feat&&LOT.feat.p===L[2],fs=Math.max(9,Math.min(sel||ft?15:13,L[3]*.62)),t=(ft?"★ ":"")+it[0];
   c.font='400 '+fs+'px "Lilita One","Nunito",system-ui,sans-serif';var tw=c.measureText(t).width,ew=fs*1.15,pw=tw+ew+fs*1.2,ph=fs*1.7,x=L[0]-pw/2,y=L[1]-ph;if(!sel&&!ft&&pw>CW*L[3]*1.02)return;
@@ -2166,7 +2186,7 @@ function init(){
 init();
 /* ===== HAYDASH: alohida 3D dunyo. Butunlay brauzerda ishlaydi, serverga so‘rov yubormaydi.
    Boshqaruv: faqat ◀ ▶ tugmalari, GAZ va TORMOZ. Davra vaqti start chizig‘idan o‘tganda o‘zi boshlanadi. ===== */
-var DS={on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
+var DS={lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
 function wrapA(a){while(a>Math.PI)a-=6.2832;while(a<-Math.PI)a+=6.2832;return a;}
 function fmtT(ms){if(!ms||ms<=0)return "–:––.–";var s=ms/1000,m=Math.floor(s/60);s-=m*60;return m+":"+(s<10?"0":"")+s.toFixed(1);}
 /* ---------- tovush ---------- */
@@ -2182,11 +2202,11 @@ function tone(f1,f2,dur,type,vol){if(!DS.au)return;try{var au=DS.au,o=au.createO
 function honk(){tone(430,430,.28,"square",.07);setTimeout(function(){tone(540,540,.25,"square",.05);},0);}
 /* ---------- mashina sozlamalari (metr/soniya) ---------- */
 function dsCfg(car){
- var s=getSpec(car.b,car.m),t=s.type,v=40,a=11;
- if(t==="mid"||t==="rear"||t==="coupe"||s.spoiler){v=58;a=19;}
- else if(t==="van"||t==="mpv"){v=30;a=7.5;}
- else if(t==="suv"||t==="cross"||t==="boxy"||t==="pickup"){v=36;a=9;}
- else if(t==="fast"){v=46;a=13;}
+ var s=getSpec(car.b,car.m),t=s.type,v=83.3,a=15;               /* 300 km/soat */
+ if(t==="mid"||t==="rear"||t==="coupe"||s.spoiler){a=26;}
+ else if(t==="fast"){a=20;}
+ else if(t==="van"||t==="mpv"){v=66;a=10;}
+ else if(t==="suv"||t==="cross"||t==="boxy"||t==="pickup"){a=14;}
  return {v:v,a:a,L:2.7};
 }
 /* ---------- kirish ---------- */
@@ -2226,9 +2246,10 @@ function beginWorld(){
  }catch(e){if(window.console)console.warn(e);quit();toast("Bu qurilmada haydash ishlamaydi");return;}
  var sp0=WLD.spawn(),car=DS.car,y0=WLD.heightAt(sp0.x,sp0.z);
  DS.cfg=dsCfg(car);DS.S={x:sp0.x,z:sp0.z,h:sp0.h,vx:0,vz:0,y:y0,camH:sp0.h,camY:y0+3,odo:0,top:0};
- DS.steer=DS.steerT=0;DS.gas=DS.brake=false;DS.keys={};DS.ti=-1;DS.prevS=-1;DS.zone="";DS.cps=0;DS.lapNo=0;DS.started=false;DS.lapStart=0;DS.wrongT=0;DS.shake=0;DS.t=0;DS.msgT=0;
+ DS.lookYaw=DS.lookPitch=0;DS.looking=false;DS.steer=DS.steerT=0;DS.gas=DS.brake=false;DS.keys={};DS.ti=-1;DS.prevS=-1;DS.zone="";DS.cps=0;DS.lapNo=0;DS.started=false;DS.lapStart=0;DS.wrongT=0;DS.shake=0;DS.t=0;DS.msgT=0;
  try{DS.best=+ls("cg.best."+code(car))||0;}catch(e){DS.best=0;}
  $("hLapBox").hidden=true;$("hMsg").hidden=true;$("drvLoad").hidden=true;resize3d();DS.last=performance.now();
+ if(!DS.hinted){DS.hinted=true;setTimeout(function(){if(DS.on)msg("Ekranni surib atrofga qarang",3200);},1800);}
  cancelAnimationFrame(DS.raf);DS.raf=requestAnimationFrame(tick);
 }
 function quit(){
@@ -2261,7 +2282,7 @@ function tick(now){
  else{vf-=Math.sign(vf)*Math.min(Math.abs(vf),3.4*dt);}
  vf-=9.8*slope*.45*dt;
  if(vf>vmaxE)vf-=(vf-vmaxE)*1.8*dt;
- vf-=vf*Math.abs(vf)*.0018*dt;
+ vf-=vf*Math.abs(vf)*.00004*dt;
  vl*=Math.exp(-grip*dt);
  /* o‘ngga burilganda yo‘nalish soat strelkasi bo‘yicha (h kamayadi) */
  var maxD=.5/(1+Math.abs(vf)/10),yaw=-vf/cfg.L*Math.tan(DS.steer*maxD);
@@ -2293,13 +2314,15 @@ function tick(now){
    if(ds<-2&&sp>6)DS.wrongT=(DS.wrongT||0)+dt;else DS.wrongT=Math.max(0,(DS.wrongT||0)-dt*2);if(DS.wrongT>1.4){msg("Teskari yo‘nalish!",900);DS.wrongT=0;}}
   DS.prevS=s;}
  else{DS.prevS=-1;}
- /* kamera: mashina ortida */
+ /* kamera: mashina ortida; barmoq bilan surilsa atrofga/tepaga/pastga qaraydi, qo‘yib yuborilsa asta qaytadi */
+ if(!DS.looking&&(DS.lookYaw||DS.lookPitch)&&now-DS.lookT>3500){var rk=Math.exp(-dt*3.2);DS.lookYaw*=rk;DS.lookPitch*=rk;if(Math.abs(DS.lookYaw)<.003&&Math.abs(DS.lookPitch)<.003)DS.lookYaw=DS.lookPitch=0;}
  S.camH+=wrapA(S.h-S.camH)*Math.min(1,dt*(3.6+sp*.02));
- var back=7.2+Math.min(3,sp*.045),cx=Math.sin(S.camH),cz=Math.cos(S.camH),cam=[S.x-cx*back,0,S.z-cz*back];
+ var ca=S.camH+DS.lookYaw,back=7.2+Math.min(3,sp*.045),cx=Math.sin(ca),cz=Math.cos(ca),cam=[S.x-cx*back,0,S.z-cz*back];
  var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
  DS.shake*=Math.pow(.02,dt);if(DS.shake>.02){cam[0]+=(Math.random()-.5)*DS.shake*.5;cam[1]+=(Math.random()-.5)*DS.shake*.5;}
  var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045);
- var dmn=Math.hypot(S.x-WLD.MC.x,S.z-WLD.MC.z),ek=Math.max(0,Math.min(1,(560-dmn)/340));ek=ek*ek*(3-2*ek);DS.ek=ek;
+ if(DS.lookPitch){var bx=tgt[0]-cam[0],by=tgt[1]-cam[1],bz=tgt[2]-cam[2],hl=Math.hypot(bx,bz)||1,L3=Math.hypot(hl,by),an=Math.atan2(by,hl)+DS.lookPitch;an=Math.max(-1.45,Math.min(1.45,an));tgt=[cam[0]+bx/hl*Math.cos(an)*L3,cam[1]+Math.sin(an)*L3,cam[2]+bz/hl*Math.cos(an)*L3];}
+ var dmn=Math.hypot(S.x-WLD.MC.x,S.z-WLD.MC.z),ek=Math.max(0,Math.min(1,(430-dmn)/250));ek=ek*ek*(3-2*ek);DS.ek=ek;
  resize3d();WLD.draw(cam,tgt,fov,ek,DS.t,dt);
  /* chang va tutun */
  if(sp>5){var bx=S.x-fx*2.1,bz=S.z-fz*2.1;
@@ -2313,11 +2336,11 @@ function tick(now){
 function drawCar(sp,vl){
  var S=DS.S,car=DS.car,W=window.innerWidth,H=window.innerHeight,land=W>H,cw=Math.min(W*(land?.46:.7),H*(land?.84:.62)),ch=cw/1.6;
  var el=$("drvCar");el.style.width=cw+"px";el.style.height=ch+"px";el.style.left=(W/2-cw/2+DS.steer*W*.012)+"px";el.style.top=(H*(land?.78:.64)-ch*.62)+"px";
- var dl=wrapA(S.h-S.camH),az=Math.atan2(-Math.cos(dl),-Math.sin(dl));
+ var dl=wrapA(S.h-S.camH-DS.lookYaw),az=Math.atan2(-Math.cos(dl),-Math.sin(dl));
  DS.cf++;
  if(DS.cf%2===0||Math.abs(dl)>.02||DS.cf<3){try{c3Render(DS.carSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:az,el:.3,seed:3,zoom:1.75,noFetch:true});}catch(e){}}
  var roll=-(DS.steer*Math.min(1,sp/30))*3.2-Math.max(-2,Math.min(2,vl*.2)),bump=Math.sin(DS.t*38)*Math.min(1.6,sp*.02);
- el.style.transform="translateY("+bump+"px) rotate("+roll+"deg)";
+ el.style.transform="translateY("+bump+"px) rotate("+roll+"deg)";el.style.opacity=String(Math.max(0,Math.min(1,1-(Math.abs(DS.lookPitch)-.3)/.25)));
 }
 function drawFx(sp){
  var c=DS.fxC||(DS.fxC=$("drvFx").getContext("2d")),W=$("drvFx").width,H=$("drvFx").height;c.clearRect(0,0,W,H);
@@ -2336,7 +2359,15 @@ function drvInit(){
  function hold(id,fn,un){var b=$(id);b.addEventListener("pointerdown",function(e){e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(x){}b.classList.add("on");fn();});function u(){b.classList.remove("on");un();}b.addEventListener("pointerup",u);b.addEventListener("pointercancel",u);b.addEventListener("lostpointercapture",u);}
  hold("stL",function(){DS.steerT=-1;},function(){if(DS.steerT<0)DS.steerT=0;});hold("stR",function(){DS.steerT=1;},function(){if(DS.steerT>0)DS.steerT=0;});
  hold("pdGas",function(){DS.gas=true;},function(){DS.gas=false;});hold("pdBrk",function(){DS.brake=true;},function(){DS.brake=false;});
- $("drvCar").addEventListener("pointerdown",function(e){e.preventDefault();honk();});
+ var lk=null,lastTap=0;
+ $("drv").addEventListener("pointerdown",function(e){if(!DS.on)return;if(e.target.closest&&e.target.closest("button"))return;if(lk)return;lk={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t0:performance.now(),moved:0};DS.looking=true;DS.lookT=performance.now();});
+ window.addEventListener("pointermove",function(e){if(!lk||e.pointerId!==lk.id||!DS.on)return;var dx=e.clientX-lk.x,dy=e.clientY-lk.y;lk.x=e.clientX;lk.y=e.clientY;lk.moved+=Math.abs(dx)+Math.abs(dy);
+  DS.lookYaw=wrapA(DS.lookYaw-dx*.0065);DS.lookPitch=Math.max(-1.0,Math.min(1.2,DS.lookPitch-dy*.0055));DS.lookT=performance.now();e.preventDefault();},{passive:false});
+ function lkEnd(e){if(!lk||e.pointerId!==lk.id)return;var now=performance.now(),tap=lk.moved<10&&now-lk.t0<300;
+  if(tap){var r=$("drvCar").getBoundingClientRect();if(lk.x0>r.left&&lk.x0<r.right&&lk.y0>r.top&&lk.y0<r.bottom&&DS.on)honk();
+   if(now-lastTap<420){DS.lookYaw=DS.lookPitch=0;}lastTap=now;}
+  DS.looking=false;DS.lookT=now;lk=null;}
+ window.addEventListener("pointerup",lkEnd);window.addEventListener("pointercancel",lkEnd);
  $("hExit").onclick=stopDrive;
  $("hReset").onclick=function(){if(!DS.on)return;var S=DS.S,t=WLD.nearRoad(S.x,S.z);if(t.r>=0){var p=WLD.ROADS[t.r].smp[t.i];S.x=p.x;S.z=p.z;S.h=Math.atan2(p.tx,p.tz);S.camH=S.h;S.vx=S.vz=0;S.y=p.y;DS.steer=DS.steerT=0;msg("Yo‘lga qaytarildi",1200);}};
  var KM={ArrowLeft:"l",ArrowRight:"r",ArrowUp:"u",ArrowDown:"d",a:"l",d:"r",w:"u",s:"d",A:"l",D:"r",W:"u",S:"d"};
