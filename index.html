@@ -195,6 +195,12 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
  #hMsg{top:34%}.hud-mid b{font-size:28px}#hSpd b{font-size:36px}
 }
 .drivebtn{flex:1 1 100%!important;background:#7ee0a0;border-color:#1c5b36!important}
+
+/* soddalashtirilgan boshqaruv: faqat ◀ ▶ va GAZ/TORMOZ */
+#ctlL{display:flex;gap:18px;width:auto}
+#ctlR{gap:14px}
+.hud-top{justify-content:space-between}
+@media (orientation:portrait){#ctlL{left:10px}.rb{width:84px;height:84px}.pd.gas{width:92px;height:128px}.pd.brk{width:82px;height:92px}}
 </style>
 </head>
 <body>
@@ -240,45 +246,20 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 <div class="modal" id="viewModal" hidden><div class="card"><div class="viewbox"><canvas id="viewCv" class="viewcv" hidden></canvas><canvas id="viewCv3" class="viewcv"></canvas></div><h3 id="vNick" style="margin-top:10px"></h3><p class="msg dark" id="vName" style="font-size:18px"></p><p class="sub" id="vSub"></p><div class="acts"><button class="btn" id="vClose">Yopish</button></div></div></div>
 <div class="modal" id="storyModal" hidden><div class="card storycard"><h3>Story uchun rasm</h3><img id="storyImg" alt="Story rasmi"><p class="sub">Rasmni bosib turib ham saqlashingiz mumkin. Story’ga qo’yganda havolani stiker qilib qo’shing.</p><div class="acts"><button class="btn" id="storyShare" hidden>Ulashish</button><a class="btn ghost dl" id="storyDl" href="#" download>Yuklab olish</a><button class="btn ghost" id="storyX">Yopish</button></div></div></div>
 <div class="modal" id="rmModal" hidden><div class="card"><h3>Mashinangiz o’chirildi</h3><p class="msg dark" id="rmText"></p><div id="rmIg"></div><div class="acts"><button class="btn" id="rmOk">Boshidan boshlash</button></div></div></div>
-<div class="modal" id="drvMenu" hidden><div class="card dm">
- <h3>Haydash</h3><p class="sub" id="dmCar"></p>
- <div class="dm-modes">
-  <button class="dm-mode" data-m="roam"><b>Tabiat sayri</b><small>Tog‘lar, o‘rmon va ko‘l bo‘ylab erkin yuring</small></button>
-  <button class="dm-mode" data-m="race"><b>Poyga yo‘li</b><small>Davra vaqtini o‘lchang, rekord qo‘ying</small></button>
- </div>
- <div class="dm-row"><span>Vaqt</span><div class="chips" id="dmEnv"><button data-v="day">Kun</button><button data-v="dusk">Shom</button></div></div>
- <div class="dm-row"><span>Boshqaruv</span><div class="chips" id="dmCtl"><button data-v="slider">Slayder</button><button data-v="buttons">Tugmalar</button><button data-v="tilt">Qiyalash</button></div></div>
- <div class="dm-row"><span>Avto-gaz</span><div class="chips" id="dmAuto"><button data-v="1">Yoniq</button><button data-v="0">O‘chiq</button></div></div>
- <button class="btn ghost dm-full" id="dmFull">Gorizontal + to‘liq ekran (qulay)</button>
- <div class="acts"><button class="btn go" id="dmGo">Boshlash</button><button class="btn ghost" id="dmX">Bekor</button></div>
-</div></div>
 <div id="drv" hidden>
  <canvas id="w3d"></canvas><canvas id="drvFx"></canvas><canvas id="drvCar" width="640" height="400"></canvas>
  <div class="hud-top">
   <button class="hbtn" id="hExit">Chiqish</button>
-  <div class="hud-mid"><div id="hLapBox"><small id="hLapNo">Davra 0</small><b id="hLap">–:––.–</b><small id="hBest"></small></div><small id="hMode"></small></div>
-  <div class="hud-r"><button class="hbtn" id="hFs">Ekran</button><button class="hbtn" id="hSet">Sozlama</button></div>
+  <div class="hud-mid" id="hLapBox" hidden><small id="hLapNo"></small><b id="hLap"></b><small id="hBest"></small></div>
+  <span></span>
  </div>
  <canvas id="hMap" width="120" height="120"></canvas>
  <div id="hMsg" hidden></div>
  <div id="drvLoad" hidden>Dunyo yuklanmoqda…</div>
  <div id="hSpd"><b id="hKmh">0</b><small>km/soat</small></div>
- <div id="ctlL">
-  <div id="stSlider"><div class="slbar"><i id="slK"></i></div><small>Barmog‘ingizni chapga-o‘ngga suring</small></div>
-  <div id="stBtns" hidden><button class="rb l" id="stL" aria-label="Chapga"></button><button class="rb r" id="stR" aria-label="O‘ngga"></button></div>
-  <div id="stTilt" hidden><div class="tw"><i></i></div><small>Telefonni qiyalang. Markazlash: bosing</small></div>
- </div>
- <div id="ctlR"><button class="hbtn horn" id="pdHorn">Signal</button><button class="pd brk" id="pdBrk">TORMOZ</button><button class="pd gas" id="pdGas">GAZ</button></div>
+ <div id="ctlL"><button class="rb l" id="stL" aria-label="Chapga"></button><button class="rb r" id="stR" aria-label="O‘ngga"></button></div>
+ <div id="ctlR"><button class="pd brk" id="pdBrk">TORMOZ</button><button class="pd gas" id="pdGas">GAZ</button></div>
 </div>
-<div class="modal" id="drvSet" hidden><div class="card dm">
- <h3>Sozlamalar</h3>
- <div class="dm-row"><span>Boshqaruv</span><div class="chips" id="dsCtl"><button data-v="slider">Slayder</button><button data-v="buttons">Tugmalar</button><button data-v="tilt">Qiyalash</button></div></div>
- <div class="dm-row" id="dsFlipRow"><span>Qiyalash yo‘nalishi</span><div class="chips" id="dsFlip"><button data-v="0">Oddiy</button><button data-v="1">Teskari</button></div></div>
- <div class="dm-row"><span>Avto-gaz</span><div class="chips" id="dsAuto"><button data-v="1">Yoniq</button><button data-v="0">O‘chiq</button></div></div>
- <div class="dm-row"><span>Ovoz</span><div class="chips" id="dsSnd"><button data-v="1">Yoniq</button><button data-v="0">O‘chiq</button></div></div>
- <div class="dm-row"><span>Sifat</span><div class="chips" id="dsQ"><button data-v="0.7">Past</button><button data-v="1">O‘rta</button><button data-v="1.4">Yuqori</button></div></div>
- <div class="acts"><button class="btn go" id="dsGo">Davom etish</button><button class="btn ghost" id="dsQuit">Chiqish</button></div>
-</div></div>
 <div id="toast" role="status"></div>
 <script>
 /* ===== Katalog: markalar va modellar [nomi, kuzov turi, uzunlik, balandlik, baza (mm), ixtiyoriy sozlamalar] ===== */
@@ -1855,17 +1836,13 @@ function init(){
  .catch(function(){$("offline").hidden=false;$("lotMsg").textContent="";$("count").textContent="";});
 }
 init();
-/* ===== HAYDASH: alohida 3D dunyo (tog‘lar, o‘rmon, ko‘l, poyga yo‘li). Butunlay brauzerda ishlaydi, serverga so‘rov yubormaydi ===== */
-var DS={on:false,paused:false,mode:"roam",env:"day",ctl:"slider",auto:true,sound:true,q:1,flip:false,car:null,item:-1,
- S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,tilt:{base:null,v:0,on:false},keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,loaded:false};
-function dsLoad(){try{var j=JSON.parse(ls("cg.drv")||"{}");["mode","env","ctl","sound","q","flip"].forEach(function(k){if(j[k]!=null)DS[k]=j[k];});if(j.auto!=null)DS.auto=!!j.auto;}catch(e){}}
-function dsSave(){ls("cg.drv",JSON.stringify({mode:DS.mode,env:DS.env,ctl:DS.ctl,auto:DS.auto,sound:DS.sound,q:DS.q,flip:DS.flip}));}
-dsLoad();
+/* ===== HAYDASH: alohida 3D dunyo. Butunlay brauzerda ishlaydi, serverga so‘rov yubormaydi.
+   Boshqaruv: faqat ◀ ▶ tugmalari, GAZ va TORMOZ. Davra vaqti start chizig‘idan o‘tganda o‘zi boshlanadi. ===== */
+var DS={on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
 function wrapA(a){while(a>Math.PI)a-=6.2832;while(a<-Math.PI)a+=6.2832;return a;}
 function fmtT(ms){if(!ms||ms<=0)return "–:––.–";var s=ms/1000,m=Math.floor(s/60);s-=m*60;return m+":"+(s<10?"0":"")+s.toFixed(1);}
 /* ---------- tovush ---------- */
 function auStart(){
- if(!DS.sound)return;
  try{var A=window.AudioContext||window.webkitAudioContext;if(!A)return;DS.au=DS.au||new A();DS.au.resume();var au=DS.au;
   if(!DS.eng){var o=au.createOscillator(),lp=au.createBiquadFilter(),g=au.createGain();o.type="sawtooth";lp.type="lowpass";lp.frequency.value=700;g.gain.value=0;o.connect(lp);lp.connect(g);g.connect(au.destination);o.start();DS.eng=o;DS.engG=g;
    var o2=au.createOscillator(),g2=au.createGain(),bp=au.createBiquadFilter();o2.type="square";o2.frequency.value=950;bp.type="bandpass";bp.frequency.value=1100;g2.gain.value=0;o2.connect(bp);bp.connect(g2);g2.connect(au.destination);o2.start();DS.sq=o2;DS.sqG=g2;
@@ -1873,134 +1850,93 @@ function auStart(){
    var ns=au.createBufferSource();ns.buffer=buf;ns.loop=true;var lp2=au.createBiquadFilter();lp2.type="lowpass";lp2.frequency.value=900;var g3=au.createGain();g3.gain.value=0;ns.connect(lp2);lp2.connect(g3);g3.connect(au.destination);ns.start();DS.wind=ns;DS.windG=g3;}}catch(e){}
 }
 function auStop(){try{[DS.eng,DS.sq,DS.wind].forEach(function(n){if(n){n.stop();n.disconnect();}});}catch(e){}DS.eng=DS.sq=DS.wind=DS.engG=DS.sqG=DS.windG=null;}
-function tone(f1,f2,dur,type,vol){if(!DS.sound||!DS.au)return;try{var au=DS.au,o=au.createOscillator(),g=au.createGain(),t=au.currentTime;o.type=type;o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(au.destination);o.start(t);o.stop(t+dur+.02);}catch(e){}}
+function tone(f1,f2,dur,type,vol){if(!DS.au)return;try{var au=DS.au,o=au.createOscillator(),g=au.createGain(),t=au.currentTime;o.type=type;o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(au.destination);o.start(t);o.stop(t+dur+.02);}catch(e){}}
+function honk(){tone(430,430,.28,"square",.07);setTimeout(function(){tone(540,540,.25,"square",.05);},0);}
 /* ---------- mashina sozlamalari (metr/soniya) ---------- */
 function dsCfg(car){
- var s=getSpec(car.b,car.m),t=s.type,v=48,a=13;
- if(t==="mid"||t==="rear"||t==="coupe"||s.spoiler){v=74;a=24;}
- else if(t==="van"||t==="mpv"){v=35;a=9;}
- else if(t==="suv"||t==="cross"||t==="boxy"||t==="pickup"){v=42;a=11;}
- else if(t==="fast"){v=56;a=16;}
+ var s=getSpec(car.b,car.m),t=s.type,v=40,a=11;
+ if(t==="mid"||t==="rear"||t==="coupe"||s.spoiler){v=58;a=19;}
+ else if(t==="van"||t==="mpv"){v=30;a=7.5;}
+ else if(t==="suv"||t==="cross"||t==="boxy"||t==="pickup"){v=36;a=9;}
+ else if(t==="fast"){v=46;a=13;}
  return {v:v,a:a,L:2.7};
 }
-/* ---------- menyu ---------- */
-function chipSet(id,val){var bs=$(id).querySelectorAll("button");for(var i=0;i<bs.length;i++)bs[i].classList.toggle("on",String(bs[i].dataset.v)===String(val));}
-function showMenu(){
- var car=DS.car;$("dmCar").textContent="@"+DS.nick+" · "+carName(car);
- var ms=$("drvMenu").querySelectorAll(".dm-mode");for(var i=0;i<ms.length;i++)ms[i].classList.toggle("on",ms[i].dataset.m===DS.mode);
- chipSet("dmEnv",DS.env);chipSet("dmCtl",DS.ctl);chipSet("dmAuto",DS.auto?1:0);
- $("drvMenu").hidden=false;
-}
+/* ---------- kirish ---------- */
 function startDrive(i){
  var car=carOf(i),it=LOT.items[i];if(!car||!it||!GLOK){toast("Bu qurilmada haydash ishlamaydi");return;}
- closeSel();DS.car=car;DS.item=i;DS.nick=it[0];showMenu();
+ closeSel();DS.car=car;DS.item=i;DS.nick=it[0];
+ DRV.on=true;DS.on=true;$("drv").hidden=false;$("drvLoad").hidden=false;$("top").style.display="none";$("lotMsg").textContent="";
+ /* gorizontal + to‘liq ekran (tugma bosilgan zahoti, ruxsat bor). Ishlamasa, vertikal holatda davom etadi */
+ try{var el=$("drv"),p=el.requestFullscreen?el.requestFullscreen():(el.webkitRequestFullscreen?el.webkitRequestFullscreen():null);if(p&&p.then)p.then(function(){try{screen.orientation.lock("landscape").catch(function(){});}catch(e){}}).catch(function(){});}catch(e){}
+ auStart();
+ setTimeout(beginWorld,120);
 }
-function chipsInit(id,cb){var bs=$(id).querySelectorAll("button");for(var i=0;i<bs.length;i++)bs[i].onclick=function(){cb(this.dataset.v);chipSet(id,this.dataset.v);};}
-/* ---------- boshqaruv ---------- */
-function applyCtl(){
- var c=DS.ctl,z=$("ctlL");z.className="ctl-"+c;
- $("stSlider").hidden=c!=="slider";$("stBtns").hidden=c!=="buttons";$("stTilt").hidden=c!=="tilt";
- if(c==="tilt")tiltStart();
-}
-function onMotion(e){
- var g=e.accelerationIncludingGravity;if(!g||g.x==null||DS.ctl!=="tilt")return;
- var a=(screen.orientation&&typeof screen.orientation.angle==="number")?screen.orientation.angle:(window.orientation||0),gx=g.x,gy=g.y;
- if(/iPad|iPhone|iPod/.test(navigator.userAgent)){gx=-gx;gy=-gy;}
- var sx,sy;a=((a%360)+360)%360;if(a===90){sx=-gy;sy=gx;}else if(a===180){sx=-gx;sy=-gy;}else if(a===270){sx=gy;sy=-gx;}else{sx=gx;sy=gy;}
- var th=Math.atan2(-sx,sy)*57.2958;if(DS.tilt.base==null)DS.tilt.base=th;
- var d=th-DS.tilt.base;d=((d+540)%360)-180;if(DS.flip)d=-d;
- var dz=3,v=Math.abs(d)<dz?0:(Math.abs(d)-dz)/(30-dz)*(d<0?-1:1);DS.tilt.v=Math.max(-1,Math.min(1,v));DS.tilt.on=true;
-}
-function tiltStart(){
- DS.tilt.base=null;if(DS.tilt.bound)return;DS.tilt.bound=true;
- try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){DeviceMotionEvent.requestPermission().then(function(r){if(r==="granted")window.addEventListener("devicemotion",onMotion);else toast("Ruxsat berilmadi: boshqa boshqaruvni tanlang");}).catch(function(){});}else window.addEventListener("devicemotion",onMotion);}catch(e){}
-}
-function ctlInit(){
- /* slayder */
- var z=$("stSlider"),knob=$("slK"),x0=0,pid=null,R=80;
- function sset(e){var d=(e.clientX-x0)/R;d=Math.max(-1,Math.min(1,d));DS.steerT=d;knob.style.transition="none";knob.style.transform="translateX("+d*58+"px)";}
- z.addEventListener("pointerdown",function(e){e.preventDefault();pid=e.pointerId;x0=e.clientX;try{z.setPointerCapture(pid);}catch(x){}sset(e);});
- z.addEventListener("pointermove",function(e){if(e.pointerId===pid)sset(e);});
- function send(e){if(e.pointerId!==pid)return;pid=null;DS.steerT=0;knob.style.transition="transform .18s";knob.style.transform="";}
- z.addEventListener("pointerup",send);z.addEventListener("pointercancel",send);
- /* tugmalar */
- function hold(id,fn,un){var b=$(id);b.addEventListener("pointerdown",function(e){e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(x){}b.classList.add("on");fn();});function u(){b.classList.remove("on");un();}b.addEventListener("pointerup",u);b.addEventListener("pointercancel",u);b.addEventListener("lostpointercapture",u);}
- hold("stL",function(){DS.steerT=-1;},function(){if(DS.steerT<0)DS.steerT=0;});hold("stR",function(){DS.steerT=1;},function(){if(DS.steerT>0)DS.steerT=0;});
- hold("pdGas",function(){DS.gas=true;},function(){DS.gas=false;});hold("pdBrk",function(){DS.brake=true;},function(){DS.brake=false;});
- $("pdHorn").addEventListener("pointerdown",function(e){e.preventDefault();tone(430,430,.28,"square",.07);setTimeout(function(){tone(540,540,.25,"square",.05);},0);});
- $("stTilt").addEventListener("pointerdown",function(){DS.tilt.base=null;toast("Rul markazlandi");});
- var KM={ArrowLeft:"l",ArrowRight:"r",ArrowUp:"u",ArrowDown:"d",a:"l",d:"r",w:"u",s:"d",A:"l",D:"r",W:"u",S:"d"};
- window.addEventListener("keydown",function(e){if(!DS.on)return;var k=KM[e.key];if(k){DS.keys[k]=true;e.preventDefault();}else if(e.key===" "){DS.brake=true;e.preventDefault();}else if(e.key==="h"||e.key==="H")tone(430,430,.28,"square",.07);else if(e.key==="Escape")stopDrive();});
- window.addEventListener("keyup",function(e){var k=KM[e.key];if(k)DS.keys[k]=false;if(e.key===" ")DS.brake=false;});
-}
-/* ---------- boshlash / tugatish ---------- */
 function resize3d(){
- var cv=$("w3d"),dpr=Math.min(window.devicePixelRatio||1,1.8)*DS.q,W=cv.clientWidth||window.innerWidth,H=cv.clientHeight||window.innerHeight;
+ var cv=$("w3d"),dpr=Math.min(window.devicePixelRatio||1,1.5),W=cv.clientWidth||window.innerWidth,H=cv.clientHeight||window.innerHeight;
  var w=Math.max(2,Math.round(W*dpr)),h=Math.max(2,Math.round(H*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
- var fx=$("drvFx");if(fx.width!==Math.round(W/2)||fx.height!==Math.round(H/2)){fx.width=Math.round(W/2);fx.height=Math.round(H/2);}
+ var fx=$("drvFx"),fw=Math.round(W/2),fh=Math.round(H/2);if(fx.width!==fw||fx.height!==fh){fx.width=fw;fx.height=fh;}
 }
 function buildMini(){
  var T=WLD.track(),c=document.createElement("canvas");c.width=c.height=120;var x=c.getContext("2d"),minx=1e9,maxx=-1e9,minz=1e9,maxz=-1e9;
  T.forEach(function(p){minx=Math.min(minx,p.x);maxx=Math.max(maxx,p.x);minz=Math.min(minz,p.z);maxz=Math.max(maxz,p.z);});
- var sc=100/Math.max(maxx-minx,maxz-minz),ox=60-(minx+maxx)/2*sc,oz=60+(minz+maxz)/2*sc;
+ var sc=100/Math.max(maxx-minx,maxz-minz),ox=60+(minx+maxx)/2*sc,oz=60+(minz+maxz)/2*sc;
  DS.mini={c:c,sc:sc,ox:ox,oz:oz};
  x.fillStyle="rgba(42,26,69,.72)";x.beginPath();x.arc(60,60,58,0,6.2832);x.fill();
- x.fillStyle="rgba(70,140,170,.75)";x.beginPath();x.arc(ox+WLD.LAKE.x*sc,oz-WLD.LAKE.z*sc,WLD.LAKE.r*sc,0,6.2832);x.fill();
- x.lineJoin="round";x.strokeStyle="rgba(255,241,214,.95)";x.lineWidth=3.2;x.beginPath();T.forEach(function(p,i){var px=ox+p.x*sc,pz=oz-p.z*sc;if(i)x.lineTo(px,pz);else x.moveTo(px,pz);});x.closePath();x.stroke();
- x.fillStyle="#ff6b6b";x.fillRect(ox+T[0].x*sc-3,oz-T[0].z*sc-3,6,6);
+ x.fillStyle="rgba(70,140,170,.75)";x.beginPath();x.arc(ox-WLD.LAKE.x*sc,oz-WLD.LAKE.z*sc,WLD.LAKE.r*sc,0,6.2832);x.fill();
+ x.lineJoin="round";x.strokeStyle="rgba(255,241,214,.95)";x.lineWidth=3.2;x.beginPath();T.forEach(function(p,i){var px=ox-p.x*sc,pz=oz-p.z*sc;if(i)x.lineTo(px,pz);else x.moveTo(px,pz);});x.closePath();x.stroke();
+ x.fillStyle="#ff6b6b";x.fillRect(ox-T[0].x*sc-3,oz-T[0].z*sc-3,6,6);
 }
 function beginWorld(){
- $("drvMenu").hidden=true;DRV.on=true;DS.on=true;DS.paused=false;$("drv").hidden=false;$("top").style.display="none";$("lotMsg").textContent="";
- $("drvLoad").hidden=false;resize3d();
- setTimeout(function(){
-  try{
-   if(!WLD.gl)WLD.init($("w3d"));
-   if(!DS.carSt)DS.carSt=c3Init($("drvCar"));
-   if(!DS.mini)buildMini();
-  }catch(e){if(window.console)console.warn(e);DS.on=false;DRV.on=false;$("drv").hidden=true;$("drvLoad").hidden=true;toast("Bu qurilmada haydash ishlamaydi");$("top").style.display="";LOT.dirty=true;return;}
-  var T=WLD.track(),i0=T.length-5,p=T[i0],car=DS.car;
-  DS.cfg=dsCfg(car);DS.S={x:p.x,z:p.z,h:Math.atan2(p.tx,p.tz),vx:0,vz:0,y:p.y,camH:Math.atan2(p.tx,p.tz),camY:p.y+3,pit:0,odo:0,top:0};
-  DS.steer=DS.steerT=0;DS.gas=DS.brake=false;DS.ti=i0;DS.prevS=T[i0].s;DS.cps=0;DS.lapNo=0;DS.started=false;DS.lapStart=0;DS.wrongT=0;DS.shake=0;DS.t=0;DS.msgT=0;DS.curLap=0;
-  try{DS.best=+ls("cg.best."+code(car))||0;}catch(e){DS.best=0;}
-  $("hLapBox").hidden=DS.mode!=="race";$("hBest").textContent="Rekord "+fmtT(DS.best);$("hLap").textContent=fmtT(0);$("hLapNo").textContent="Davra 0";$("hMsg").hidden=true;
-  $("hMode").textContent=DS.mode==="race"?"":"Tabiat sayri";
-  applyCtl();auStart();$("drvLoad").hidden=true;resize3d();DS.last=performance.now();
-  if(DS.mode==="race")msg("Startga tayyor! Chiziqdan o‘ting",3200);
-  cancelAnimationFrame(DS.raf);DS.raf=requestAnimationFrame(tick);
- },60);
+ resize3d();
+ try{
+  if(!WLD.gl)WLD.init($("w3d"));
+  if(!DS.carSt)DS.carSt=c3Init($("drvCar"));
+  if(!DS.mini)buildMini();
+ }catch(e){if(window.console)console.warn(e);quit();toast("Bu qurilmada haydash ishlamaydi");return;}
+ var T=WLD.track(),i0=T.length-6,p=T[i0],car=DS.car;
+ DS.cfg=dsCfg(car);DS.S={x:p.x,z:p.z,h:Math.atan2(p.tx,p.tz),vx:0,vz:0,y:p.y,camH:Math.atan2(p.tx,p.tz),camY:p.y+3,odo:0,top:0};
+ DS.steer=DS.steerT=0;DS.gas=DS.brake=false;DS.keys={};DS.ti=i0;DS.prevS=T[i0].s;DS.cps=0;DS.lapNo=0;DS.started=false;DS.lapStart=0;DS.wrongT=0;DS.shake=0;DS.t=0;DS.msgT=0;
+ try{DS.best=+ls("cg.best."+code(car))||0;}catch(e){DS.best=0;}
+ $("hLapBox").hidden=true;$("hMsg").hidden=true;$("drvLoad").hidden=true;resize3d();DS.last=performance.now();
+ cancelAnimationFrame(DS.raf);DS.raf=requestAnimationFrame(tick);
+}
+function quit(){
+ DS.on=false;DRV.on=false;cancelAnimationFrame(DS.raf);auStop();$("drv").hidden=true;$("drvLoad").hidden=true;$("top").style.display="";
+ try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen();if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();}catch(e){}
+ LOT.dirty=true;
 }
 function stopDrive(){
- if(!DS.on)return;DS.on=false;DRV.on=false;cancelAnimationFrame(DS.raf);auStop();$("drv").hidden=true;$("drvSet").hidden=true;$("top").style.display="";
- try{if(document.fullscreenElement)document.exitFullscreen();if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();}catch(e){}
- var xy=cellXY(DS.item);LOT.anim={t0:performance.now(),dur:700,fx:LOT.cam.x,fy:LOT.cam.y,fd:LOT.cam.d,tx:xy[0],ty:xy[1]-CH*.35,td:14};LOT.dirty=true;
+ if(!DS.on)return;quit();
+ var xy=cellXY(DS.item);LOT.anim={t0:performance.now(),dur:700,fx:LOT.cam.x,fy:LOT.cam.y,fd:LOT.cam.d,tx:xy[0],ty:xy[1]-CH*.35,td:14};
 }
 function msg(t,ms){var m=$("hMsg");m.textContent=t;m.hidden=false;DS.msgT=ms||2200;}
 /* ---------- har kadr ---------- */
 function tick(now){
  if(!DS.on)return;DS.raf=requestAnimationFrame(tick);
- var dt=Math.min(.05,(now-DS.last)/1000||.016);DS.last=now;if(DS.paused)return;DS.t+=dt;
+ var dt=Math.min(.05,(now-DS.last)/1000||.016);DS.last=now;DS.t+=dt;
  var S=DS.S,cfg=DS.cfg,T=WLD.track(),TL=WLD.trackLen();
- /* kirish */
- var k=DS.keys,kt=(k.r?1:0)-(k.l?1:0);if(kt)DS.steerT=kt;else if(DS.ctl!=="slider"&&DS.ctl!=="buttons")DS.steerT=0;
- var target=DS.ctl==="tilt"&&DS.tilt.on?DS.tilt.v:DS.steerT;
- DS.steer+=(target-DS.steer)*Math.min(1,dt*(Math.abs(target)>Math.abs(DS.steer)?8:12));
- var fx=Math.sin(S.h),fz=Math.cos(S.h),rx=fz,rz=-fx;
+ /* rul: tugma bosilganda sekin-asta buriladi (keskin emas) */
+ var k=DS.keys,kt=(k.r?1:0)-(k.l?1:0),target=kt?kt:DS.steerT;
+ DS.steer+=(target-DS.steer)*Math.min(1,dt*(Math.abs(target)>Math.abs(DS.steer)?4.2:10));
+ /* yo‘nalish: oldinga (sin h, cos h); ekrandagi O‘NG tomon = (-cos h, sin h) */
+ var fx=Math.sin(S.h),fz=Math.cos(S.h),rx=-fz,rz=fx;
  var vf=S.vx*fx+S.vz*fz,vl=S.vx*rx+S.vz*rz;
  var info=WLD.trackNear(S.x,S.z,DS.ti);if(info.i>=0)DS.ti=info.i;
- var onRoad=info.d<WLD.ROADH+1.4,kerb=info.d<WLD.ROADH+2.6;
- var thr=(DS.gas||k.u)?1:(DS.auto?.8:0),brk=DS.brake||k.d;
+ var onRoad=info.d<WLD.ROADH+1.4;
+ var gas=DS.gas||k.u,brk=DS.brake||k.d;
  var vmaxE=onRoad?cfg.v:cfg.v*.58,grip=onRoad?8.5:4;
- var h0=WLD.heightAt(S.x,S.z),hf=WLD.heightAt(S.x+fx*2,S.z+fz*2);var slope=(hf-h0)/2;
- if(brk){if(vf>.8)vf-=40*dt;else vf=Math.max(-10,vf-9*dt);}
- else if(thr>0){vf+=cfg.a*thr*Math.max(0,1-Math.max(0,vf)/vmaxE)*dt*(vf<0?2:1);}
- else{vf-=Math.sign(vf)*Math.min(Math.abs(vf),3.2*dt);}
+ var h0=WLD.heightAt(S.x,S.z),hf=WLD.heightAt(S.x+fx*2,S.z+fz*2),slope=(hf-h0)/2;
+ if(brk){if(vf>.8)vf-=36*dt;else vf=Math.max(-8,vf-8*dt);}
+ else if(gas){vf+=cfg.a*Math.max(0,1-Math.max(0,vf)/vmaxE)*dt*(vf<0?2:1);}
+ else{vf-=Math.sign(vf)*Math.min(Math.abs(vf),3.4*dt);}
  vf-=9.8*slope*.45*dt;
  if(vf>vmaxE)vf-=(vf-vmaxE)*1.8*dt;
- vf-=vf*Math.abs(vf)*.0016*dt;
+ vf-=vf*Math.abs(vf)*.0018*dt;
  vl*=Math.exp(-grip*dt);
- var maxD=.55/(1+Math.abs(vf)/16),yaw=vf/cfg.L*Math.tan(DS.steer*maxD);
+ /* o‘ngga burilganda yo‘nalish soat strelkasi bo‘yicha (h kamayadi) */
+ var maxD=.5/(1+Math.abs(vf)/10),yaw=-vf/cfg.L*Math.tan(DS.steer*maxD);
  S.h+=yaw*dt;
- fx=Math.sin(S.h);fz=Math.cos(S.h);rx=fz;rz=-fx;
+ fx=Math.sin(S.h);fz=Math.cos(S.h);rx=-fz;rz=fx;
  S.vx=fx*vf+rx*vl;S.vz=fz*vf+rz*vl;
  var ox=S.x,oz=S.z;S.x+=S.vx*dt;S.z+=S.vz*dt;
  /* to‘siqlar */
@@ -2010,75 +1946,66 @@ function tick(now){
  var rr=Math.hypot(S.x,S.z);if(rr>440){var nx=S.x/rr,nz=S.z/rr;S.x=nx*440;S.z=nz*440;var vn2=S.vx*nx+S.vz*nz;if(vn2>0){S.vx-=vn2*nx*1.6;S.vz-=vn2*nz*1.6;}if(DS.t-(DS.edgeT||-9)>3){DS.edgeT=DS.t;msg("Hudud: orqaga qayting",1600);}}
  var sp=Math.hypot(S.vx,S.vz);S.top=Math.max(S.top,sp);S.odo+=sp*dt;
  S.y+=(WLD.heightAt(S.x,S.z)-S.y)*Math.min(1,dt*14);
- /* poyga */
+ /* davra vaqti: start chizig‘idan o‘tganda o‘zi boshlanadi */
  if(info.i>=0){var s=T[DS.ti].s,ds=s-DS.prevS;if(ds>TL/2)ds-=TL;else if(ds<-TL/2)ds+=TL;
-  if(DS.mode==="race"){
-   if(DS.prevS>TL*.85&&s<TL*.15&&ds>0){ /* chiziqdan o‘tdi */
-    if(!DS.started){DS.started=true;DS.lapStart=now;DS.lapNo=1;DS.cps=0;msg("Boshladik!",1400);$("hLapNo").textContent="Davra 1";}
-    else if(DS.cps>=3){var lt=now-DS.lapStart,nb=!DS.best||lt<DS.best;if(nb){DS.best=lt;try{ls("cg.best."+code(DS.car),String(Math.round(lt)));}catch(e){}}msg((nb?"Yangi rekord! ":"Davra tugadi: ")+fmtT(lt),3200);tone(660,990,.3,"triangle",.12);DS.lapStart=now;DS.lapNo++;DS.cps=0;$("hLapNo").textContent="Davra "+DS.lapNo;$("hBest").textContent="Rekord "+fmtT(DS.best);}
-    else if(DS.started){msg("Nazorat nuqtalarini o‘tmadingiz!",1800);DS.lapStart=now;DS.cps=0;}
-   }
-   if(DS.started){var q=DS.cps+1;if(q<=3&&s>=TL*q*.25&&s<TL*(q*.25+.12)&&ds>0){DS.cps=q;msg("Nazorat nuqtasi "+q+"/3",1100);tone(520,520,.12,"triangle",.1);}}
+  if(DS.prevS>TL*.85&&s<TL*.15&&ds>0){
+   if(!DS.started){DS.started=true;DS.lapStart=now;DS.lapNo=1;DS.cps=0;$("hLapBox").hidden=false;$("hLapNo").textContent="Davra 1";$("hBest").textContent="Rekord "+fmtT(DS.best);msg("Vaqt boshlandi!",1400);}
+   else if(DS.cps>=3){var lt=now-DS.lapStart,nb=!DS.best||lt<DS.best;if(nb){DS.best=lt;try{ls("cg.best."+code(DS.car),String(Math.round(lt)));}catch(e){}}msg((nb?"Yangi rekord! ":"Davra: ")+fmtT(lt),3200);tone(660,990,.3,"triangle",.12);DS.lapStart=now;DS.lapNo++;DS.cps=0;$("hLapNo").textContent="Davra "+DS.lapNo;$("hBest").textContent="Rekord "+fmtT(DS.best);}
+   else{DS.lapStart=now;DS.cps=0;}
   }
-  if(DS.mode==="race"){if(ds<-2&&sp>6)DS.wrongT=(DS.wrongT||0)+dt;else DS.wrongT=Math.max(0,(DS.wrongT||0)-dt*2);if(DS.wrongT>1.4){msg("Teskari yo‘nalish!",900);DS.wrongT=0;}}else DS.wrongT=0;
+  if(DS.started){var q=DS.cps+1;if(q<=3&&s>=TL*q*.25&&s<TL*(q*.25+.12)&&ds>0){DS.cps=q;msg("Nazorat nuqtasi "+q+"/3",1100);tone(520,520,.12,"triangle",.1);}
+   if(ds<-2&&sp>6)DS.wrongT=(DS.wrongT||0)+dt;else DS.wrongT=Math.max(0,(DS.wrongT||0)-dt*2);if(DS.wrongT>1.4){msg("Teskari yo‘nalish!",900);DS.wrongT=0;}}
   DS.prevS=s;}
- /* kamera */
+ /* kamera: mashina ortida */
  S.camH+=wrapA(S.h-S.camH)*Math.min(1,dt*(3.6+sp*.02));
  var back=7.2+Math.min(3,sp*.045),cx=Math.sin(S.camH),cz=Math.cos(S.camH),cam=[S.x-cx*back,0,S.z-cz*back];
- var ch=WLD.heightAt(cam[0],cam[2]);var wantY=Math.max(S.y+2.7+sp*.012,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
+ var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
  DS.shake*=Math.pow(.02,dt);if(DS.shake>.02){cam[0]+=(Math.random()-.5)*DS.shake*.5;cam[1]+=(Math.random()-.5)*DS.shake*.5;}
- var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.34,sp*.0042);
- resize3d();WLD.draw(cam,tgt,fov,DS.env,DS.t,dt);
+ var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045);
+ resize3d();WLD.draw(cam,tgt,fov,"day",DS.t,dt);
  /* chang va tutun */
  if(sp>5){var bx=S.x-fx*2.1,bz=S.z-fz*2.1;
   if(!onRoad&&Math.random()<dt*32){var d2=(Math.random()<.5?-1:1)*.9;WLD.puff(bx+rx*d2,S.y+.3,bz+rz*d2,-S.vx*.12+(Math.random()-.5)*2,1.2,-S.vz*.12+(Math.random()-.5)*2,1.1,1.8,[.62,.54,.4],.6);}
   if(onRoad&&Math.abs(vl)>3.4&&Math.random()<dt*48){var d3=(Math.random()<.5?-1:1)*.9;WLD.puff(bx+rx*d3,S.y+.25,bz+rz*d3,(Math.random()-.5),.8,(Math.random()-.5),1.0,1.5,[.92,.92,.95],.55);}
  }
- drawCar(sp,vl,vf);drawFx(sp);drawHud(sp,vl,vf);
- /* tovush */
- if(DS.eng&&DS.au){var t=DS.au.currentTime,rp=Math.min(1,sp/cfg.v);DS.eng.frequency.setTargetAtTime(48+rp*190+(thr>0?16:0),t,.06);DS.engG.gain.setTargetAtTime(DS.sound?.022+.04*rp+.02*thr:0,t,.08);
-  DS.sqG.gain.setTargetAtTime(DS.sound&&onRoad&&Math.abs(vl)>4.2?Math.min(.035,(Math.abs(vl)-4)*.01):0,t,.05);DS.windG.gain.setTargetAtTime(DS.sound?Math.min(.12,sp*.0021):0,t,.1);}
+ drawCar(sp,vl);drawFx(sp);drawHud(vf);
+ if(DS.eng&&DS.au){var t=DS.au.currentTime,rp=Math.min(1,sp/cfg.v);DS.eng.frequency.setTargetAtTime(48+rp*190+(gas?16:0),t,.06);DS.engG.gain.setTargetAtTime(.022+.04*rp+(gas?.02:0),t,.08);
+  DS.sqG.gain.setTargetAtTime(onRoad&&Math.abs(vl)>4.2?Math.min(.035,(Math.abs(vl)-4)*.01):0,t,.05);DS.windG.gain.setTargetAtTime(Math.min(.12,sp*.0021),t,.1);}
 }
-function drawCar(sp,vl,vf){
+function drawCar(sp,vl){
  var S=DS.S,car=DS.car,W=window.innerWidth,H=window.innerHeight,land=W>H,cw=Math.min(W*(land?.46:.7),H*(land?.84:.62)),ch=cw/1.6;
  var el=$("drvCar");el.style.width=cw+"px";el.style.height=ch+"px";el.style.left=(W/2-cw/2+DS.steer*W*.012)+"px";el.style.top=(H*(land?.78:.64)-ch*.62)+"px";
- var dl=wrapA(S.h-S.camH),az=Math.atan2(-Math.cos(dl),Math.sin(dl));
- DS.cf=(DS.cf||0)+1;
+ var dl=wrapA(S.h-S.camH),az=Math.atan2(-Math.cos(dl),-Math.sin(dl));
+ DS.cf++;
  if(DS.cf%2===0||Math.abs(dl)>.02||DS.cf<3){try{c3Render(DS.carSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:az,el:.3,seed:3,zoom:1.75});}catch(e){}}
- var roll=-(DS.steer*Math.min(1,sp/30))*3.2+Math.max(-2,Math.min(2,vl*.25)),bump=Math.sin(DS.t*38)*Math.min(1.6,sp*.02);
+ var roll=-(DS.steer*Math.min(1,sp/30))*3.2-Math.max(-2,Math.min(2,vl*.2)),bump=Math.sin(DS.t*38)*Math.min(1.6,sp*.02);
  el.style.transform="translateY("+bump+"px) rotate("+roll+"deg)";
 }
 function drawFx(sp){
  var c=DS.fxC||(DS.fxC=$("drvFx").getContext("2d")),W=$("drvFx").width,H=$("drvFx").height;c.clearRect(0,0,W,H);
- var q=Math.min(1,Math.max(0,(sp-26)/50));if(q<=.02)return;
+ var q=Math.min(1,Math.max(0,(sp-24)/36));if(q<=.02)return;
  c.strokeStyle="rgba(255,255,255,"+(.16*q)+")";c.lineWidth=1.4;
  for(var i=0;i<16;i++){var a=(i*2.399+DS.t*.5)%6.2832,r0=Math.min(W,H)*(.55+.1*((i*7)%5)/5),r1=r0+Math.min(W,H)*(.14+.22*q);c.beginPath();c.moveTo(W/2+Math.cos(a)*r0*1.35,H*.45+Math.sin(a)*r0);c.lineTo(W/2+Math.cos(a)*r1*1.35,H*.45+Math.sin(a)*r1);c.stroke();}
 }
-function drawHud(sp,vl,vf){
- $("hKmh").textContent=Math.round(Math.abs(vf)*3.6);if(DS.ctl==="tilt"){var tw=document.querySelector("#stTilt .tw");if(tw)tw.style.transform="rotate("+(DS.steer*55)+"deg)";}
- var S=DS.S,m=DS.mini,T=WLD.track();
- if(m){var c=$("hMap").getContext("2d");c.clearRect(0,0,120,120);c.drawImage(m.c,0,0);var px=m.ox+S.x*m.sc,pz=m.oz-S.z*m.sc;c.save();c.translate(px,pz);c.rotate(S.h);c.fillStyle="#ffd27a";c.strokeStyle="#2a1a45";c.lineWidth=1.5;c.beginPath();c.moveTo(0,-6);c.lineTo(4.5,5);c.lineTo(-4.5,5);c.closePath();c.fill();c.stroke();c.restore();}
- if(DS.mode==="race"&&DS.started){var now=performance.now();$("hLap").textContent=fmtT(now-DS.lapStart);}
+function drawHud(vf){
+ $("hKmh").textContent=Math.round(Math.abs(vf)*3.6);
+ var S=DS.S,m=DS.mini;
+ if(m){var c=$("hMap").getContext("2d");c.clearRect(0,0,120,120);c.drawImage(m.c,0,0);var px=m.ox-S.x*m.sc,pz=m.oz-S.z*m.sc;c.save();c.translate(px,pz);c.rotate(-S.h);c.fillStyle="#ffd27a";c.strokeStyle="#2a1a45";c.lineWidth=1.5;c.beginPath();c.moveTo(0,-6);c.lineTo(4.5,5);c.lineTo(-4.5,5);c.closePath();c.fill();c.stroke();c.restore();}
+ if(DS.started)$("hLap").textContent=fmtT(performance.now()-DS.lapStart);
  if(DS.msgT>0){DS.msgT-=16.7;if(DS.msgT<=0)$("hMsg").hidden=true;}
 }
-function pauseOpen(){DS.paused=true;$("drvSet").hidden=false;chipSet("dsCtl",DS.ctl);chipSet("dsAuto",DS.auto?1:0);chipSet("dsSnd",DS.sound?1:0);chipSet("dsQ",DS.q);chipSet("dsFlip",DS.flip?1:0);$("dsFlipRow").hidden=DS.ctl!=="tilt";}
-function pauseClose(){DS.paused=false;$("drvSet").hidden=true;DS.last=performance.now();}
-function toggleFs(){
- try{var el=$("drv");if(document.fullscreenElement){document.exitFullscreen();return;}
-  var p=el.requestFullscreen?el.requestFullscreen():null;if(p&&p.then)p.then(function(){try{screen.orientation.lock("landscape").catch(function(){});}catch(e){}}).catch(function(){toast("To‘liq ekran bu qurilmada ishlamaydi");});else toast("To‘liq ekran bu qurilmada ishlamaydi");}catch(e){toast("To‘liq ekran bu qurilmada ishlamaydi");}
-}
 function drvInit(){
- var ms=$("drvMenu").querySelectorAll(".dm-mode");for(var i=0;i<ms.length;i++)ms[i].onclick=function(){DS.mode=this.dataset.m;for(var j=0;j<ms.length;j++)ms[j].classList.toggle("on",ms[j]===this);};
- chipsInit("dmEnv",function(v){DS.env=v;});chipsInit("dmCtl",function(v){DS.ctl=v;});chipsInit("dmAuto",function(v){DS.auto=v==="1";});
- $("dmGo").onclick=function(){dsSave();auStart();if(DS.ctl==="tilt")tiltStart();beginWorld();};$("dmX").onclick=function(){$("drvMenu").hidden=true;};$("dmFull").onclick=function(){toggleFs();};
- $("drvCar").addEventListener("pointerdown",function(e){e.preventDefault();tone(430,430,.28,"square",.07);setTimeout(function(){tone(540,540,.25,"square",.05);},0);});
- $("hExit").onclick=stopDrive;$("hSet").onclick=pauseOpen;$("hFs").onclick=toggleFs;$("dsGo").onclick=pauseClose;$("dsQuit").onclick=function(){pauseClose();stopDrive();};
- chipsInit("dsCtl",function(v){DS.ctl=v;dsSave();applyCtl();$("dsFlipRow").hidden=v!=="tilt";});chipsInit("dsAuto",function(v){DS.auto=v==="1";dsSave();});
- chipsInit("dsSnd",function(v){DS.sound=v==="1";dsSave();if(DS.sound)auStart();else if(DS.engG){DS.engG.gain.value=0;DS.windG.gain.value=0;DS.sqG.gain.value=0;}});
- chipsInit("dsQ",function(v){DS.q=+v;dsSave();});chipsInit("dsFlip",function(v){DS.flip=v==="1";dsSave();});
- ctlInit();
- window.addEventListener("resize",function(){if(DS.on){resize3d();}});
- DS.fn={onMotion:onMotion};window.__drv=function(){return DS;};
+ function hold(id,fn,un){var b=$(id);b.addEventListener("pointerdown",function(e){e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(x){}b.classList.add("on");fn();});function u(){b.classList.remove("on");un();}b.addEventListener("pointerup",u);b.addEventListener("pointercancel",u);b.addEventListener("lostpointercapture",u);}
+ hold("stL",function(){DS.steerT=-1;},function(){if(DS.steerT<0)DS.steerT=0;});hold("stR",function(){DS.steerT=1;},function(){if(DS.steerT>0)DS.steerT=0;});
+ hold("pdGas",function(){DS.gas=true;},function(){DS.gas=false;});hold("pdBrk",function(){DS.brake=true;},function(){DS.brake=false;});
+ $("drvCar").addEventListener("pointerdown",function(e){e.preventDefault();honk();});
+ $("hExit").onclick=stopDrive;
+ var KM={ArrowLeft:"l",ArrowRight:"r",ArrowUp:"u",ArrowDown:"d",a:"l",d:"r",w:"u",s:"d",A:"l",D:"r",W:"u",S:"d"};
+ window.addEventListener("keydown",function(e){if(!DS.on)return;var k=KM[e.key];if(k){DS.keys[k]=true;e.preventDefault();}else if(e.key==="h"||e.key==="H")honk();else if(e.key==="Escape")stopDrive();});
+ window.addEventListener("keyup",function(e){var k=KM[e.key];if(k)DS.keys[k]=false;});
+ window.addEventListener("resize",function(){if(DS.on)resize3d();});
+ document.addEventListener("fullscreenchange",function(){if(DS.on&&!document.fullscreenElement&&!DS.leaving){/* foydalanuvchi to‘liq ekrandan chiqdi: o‘yin davom etadi */}});
+ window.__drv=function(){return DS;};
 }
 drvInit();
 
