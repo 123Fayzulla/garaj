@@ -1329,7 +1329,8 @@ var WLD=(function(){
  }
  function buildRoads(){
   /* poyga aylanasi */
-  var base=[[0,0],[110,-40],[220,-105],[300,-50],[312,60],[240,140],[140,190],[30,212],[-85,182],[-168,112],[-208,10],[-150,-82],[-70,-122],[-22,-62]];
+  /* qiyinroq trassa: shikan, ikki keskin U-burilish, S-burilishlar */
+  var base=[[0,0],[120,-20],[175,-60],[215,-30],[265,-80],[310,-40],[318,20],[285,55],[225,45],[185,95],[225,145],[175,195],[60,210],[-30,175],[-60,115],[-20,70],[-90,40],[-170,90],[-205,10],[-160,-80],[-80,-115],[-30,-60]];
   var cx=45,cz=45,cp=base.map(function(p){return [p[0]-cx+RACE.x,p[1]-cz+RACE.z];});
   LOOP=addRoad({style:"race",pts:cp,closed:true,half:6.5,ds:2.5,seg:40});
   /* shahar ko‘chalari */
@@ -2306,7 +2307,7 @@ function stopDrive(){
 function msg(t,ms){var m=$("hMsg");m.textContent=t;m.hidden=false;DS.msgT=ms||2200;}
 
 /* ---------- RAQIB BILAN POYGA: start chizig‘ida kutib turgan mashina ideal yo‘ldan yuradi ---------- */
-var RL=null,LAPS=2,AI_VMAX=92,AI_ACC=13,AI_DEC=17,AI_LAT=19,LANE=3.1;
+var RL=null,LAPS=2,AI_VMAX=69.4,AI_ACC=13,AI_DEC=17,AI_LAT=19,LANE=3.1;
 function buildRL(){
  var T=WLD.track(),N=T.length,H=WLD.loopHalf()-1.8,o=new Float32Array(N),i,it,K=5;
  for(it=0;it<320;it++)for(i=0;i<N;i++){var ia=(i-K+N)%N,ib=(i+K)%N,a=T[ia],b=T[ib],mx=(a.x-a.tz*o[ia]+b.x-b.tz*o[ib])/2,mz=(a.z+a.tx*o[ia]+b.z+b.tx*o[ib])/2,p=T[i],v=(mx-p.x)*(-p.tz)+(mz-p.z)*p.tx;o[i]=Math.max(-H,Math.min(H,o[i]+(v-o[i])*.5));}
@@ -2391,7 +2392,7 @@ function tick(now){
  if(turbo){tb.e-=dt;if(tb.e<=0){tb.e=0;tb.lock=25;DS.turbo=false;msg("Turbo tugadi: 25 soniyada qayta to‘ladi",2200);}}else if(tb.lock>0){tb.lock-=dt;if(tb.lock<=0){tb.lock=0;tb.e=5;msg("Turbo tayyor!",1400);}}else tb.e=Math.min(5,tb.e+dt*5/25);
  turboUI(racing);
  var gas=(DS.gas||k.u||turbo)&&!counting;var brk=DS.brake||k.d;DS.turboOn=turbo;
- var vmaxE=onRoad?(turbo?138.9:cfg.v):cfg.v*.58,grip=onRoad?8.5:4;
+ var vcap=racing?Math.min(cfg.v,69.4):cfg.v,vmaxE=onRoad?(turbo?138.9:vcap):vcap*.58,grip=onRoad?8.5:4;
  var h0=WLD.heightAt(S.x,S.z),hf=WLD.heightAt(S.x+fx*2,S.z+fz*2),slope=(hf-h0)/2;
  if(brk){if(vf>.8)vf-=36*dt;else vf=Math.max(-8,vf-8*dt);}
  else if(turbo&&onRoad){vf+=31*Math.max(0,1-Math.pow(Math.max(0,vf)/138.9,14))*dt*(vf<0?2:1);}
