@@ -224,6 +224,8 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 @media (orientation:portrait){#ctlR{position:absolute}#pdTurbo{position:absolute;right:4px;bottom:118px;margin:0}}
 .hbtn.race{background:#ffb547;color:#2a1a45;border-color:#2a1a45;animation:racePulse 1.2s ease-in-out infinite}
 @keyframes racePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+#pdTurbo{transition:filter .2s}#pdTurbo.off{filter:grayscale(.6) brightness(.85);color:#fff1d6}
 </style>
 </head>
 <body>
@@ -2226,7 +2228,7 @@ function init(){
 init();
 /* ===== HAYDASH: alohida 3D dunyo. Butunlay brauzerda ishlaydi, serverga so‘rov yubormaydi.
    Boshqaruv: faqat ◀ ▶ tugmalari, GAZ va TORMOZ. Davra vaqti start chizig‘idan o‘tganda o‘zi boshlanadi. ===== */
-var DS={rc:null,ai:null,turbo:false,res:1,fAvg:16,qT:0,lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
+var DS={tb:{e:5,lock:0},rc:null,ai:null,turbo:false,res:1,fAvg:16,qT:0,lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
 function wrapA(a){while(a>Math.PI)a-=6.2832;while(a<-Math.PI)a+=6.2832;return a;}
 function fmtT(ms){if(!ms||ms<=0)return "–:––.–";var s=ms/1000,m=Math.floor(s/60);s-=m*60;return m+":"+(s<10?"0":"")+s.toFixed(1);}
 /* ---------- tovush ---------- */
@@ -2348,6 +2350,8 @@ function raceTick(now,dt,S,sp){
    ai.F+=ai.v*dt/RL.ln[fi];}
   /* o‘yinchi: aylana bo‘ylab yurgan masofa */
   var lp=WLD.loopNear(S.x,S.z,DS.ti);
+  if(lp&&rc.phase==="run"){var Tt=WLD.track(),pp=Tt[lp.i],nx=-pp.tz,nz=pp.tx,lat=(S.x-pp.x)*nx+(S.z-pp.z)*nz,LIM=WLD.loopHalf()+.9;
+   if(Math.abs(lat)>LIM){var sg=lat>0?1:-1,over=Math.abs(lat)-LIM;S.x-=nx*sg*over;S.z-=nz*sg*over;var vo=(S.vx*nx+S.vz*nz)*sg;if(vo>0){S.vx-=nx*sg*vo*1.25;S.vz-=nz*sg*vo*1.25;S.vx*=.92;S.vz*=.92;}DS.shake=Math.max(DS.shake,.12);}lp.d=Math.min(lp.d,LIM);}
   if(lp&&lp.d<30){DS.ti=lp.i;var cur=((Math.floor(rc.pF)%N)+N)%N,di=lp.i-cur;if(di>N/2)di-=N;if(di<-N/2)di+=N;if(Math.abs(di)<40)rc.pF+=di;rc.offT=0;}else rc.offT+=dt;
   if(rc.phase==="run"){
    var tEl=now-rc.tGo,pl=Math.max(0,Math.min(LAPS,Math.floor((rc.pF-N)/N)+1)),pos=rc.pF>=ai.F?1:2;
@@ -2356,7 +2360,7 @@ function raceTick(now,dt,S,sp){
    if(pDone&&!aDone){tone(660,990,.4,"triangle",.14);endRace("🏆 G‘alaba! Vaqt: "+fmtT(tEl),6000);}
    else if(aDone&&!pDone){tone(300,200,.4,"sawtooth",.08);endRace("Raqib yutdi. Yana urinib ko‘ring!",6000);}
    else if(pDone&&aDone)endRace("Durang!",5000);
-   if(rc.offT>8)endRace("Poyga bekor qilindi (yo‘ldan chiqdingiz)",3500);}
+   if(rc.offT>20)endRace("Poyga bekor qilindi",3500);}
   else if(now-rc.tEnd>7000){DS.rc={phase:"idle"};ai.F=g;ai.v=0;$("hLapBox").hidden=true;}
  }
  /* raqibni chizish va to‘qnashuv */
@@ -2364,6 +2368,10 @@ function raceTick(now,dt,S,sp){
  WLD.cars=[{x:ps.x,y:ps.y,z:ps.z,h:ps.h,p:ps.p}];DS.aiPos=ps;
  var dx=S.x-ps.x,dz=S.z-ps.z,dd=Math.hypot(dx,dz);if(dd<2.6&&dd>.01){var pen=2.6-dd;S.x+=dx/dd*pen;S.z+=dz/dd*pen;var vn=(S.vx*dx+S.vz*dz)/dd;if(vn<0){S.vx-=vn*dx/dd*1.2;S.vz-=vn*dz/dd*1.2;}DS.shake=Math.max(DS.shake,.3);}
 }
+function turboUI(racing){var b=$("pdTurbo"),tb=DS.tb;if(!b)return;var off=racing||tb.lock>0,deg=Math.round((tb.lock>0?(25-tb.lock)/25:tb.e/5)*360);
+ var key=(off?1:0)+"|"+deg+"|"+(tb.lock>0?Math.ceil(tb.lock):0)+"|"+(racing?1:0);if(b._k===key)return;b._k=key;
+ b.classList.toggle("off",off);b.style.background=racing?"#6d6276":"conic-gradient("+(tb.lock>0?"#9a8aa8":"#ff8a1f")+" "+deg+"deg,#4d3f5c "+deg+"deg)";
+ b.textContent=racing?"—":(tb.lock>0?Math.ceil(tb.lock)+"s":"TURBO");}
 /* ---------- har kadr ---------- */
 function tick(now){
  if(!DS.on)return;DS.raf=requestAnimationFrame(tick);
@@ -2379,7 +2387,10 @@ function tick(now){
  var fx=Math.sin(S.h),fz=Math.cos(S.h),rx=-fz,rz=fx;
  var vf=S.vx*fx+S.vz*fz,vl=S.vx*rx+S.vz*rz;
  var sf=WLD.surface(S.x,S.z),onRoad=sf.on;
- var counting=DS.rc&&DS.rc.phase==="count",turbo=(DS.turbo||k.t)&&!counting,gas=(DS.gas||k.u||turbo)&&!counting,brk=DS.brake||k.d;DS.turboOn=turbo;
+ var counting=DS.rc&&DS.rc.phase==="count",racing=DS.rc&&DS.rc.phase!=="idle",tb=DS.tb,turbo=(DS.turbo||k.t)&&!racing&&tb.lock<=0&&tb.e>0;
+ if(turbo){tb.e-=dt;if(tb.e<=0){tb.e=0;tb.lock=25;DS.turbo=false;msg("Turbo tugadi: 25 soniyada qayta to‘ladi",2200);}}else if(tb.lock>0){tb.lock-=dt;if(tb.lock<=0){tb.lock=0;tb.e=5;msg("Turbo tayyor!",1400);}}else tb.e=Math.min(5,tb.e+dt*5/25);
+ turboUI(racing);
+ var gas=(DS.gas||k.u||turbo)&&!counting;var brk=DS.brake||k.d;DS.turboOn=turbo;
  var vmaxE=onRoad?(turbo?138.9:cfg.v):cfg.v*.58,grip=onRoad?8.5:4;
  var h0=WLD.heightAt(S.x,S.z),hf=WLD.heightAt(S.x+fx*2,S.z+fz*2),slope=(hf-h0)/2;
  if(brk){if(vf>.8)vf-=36*dt;else vf=Math.max(-8,vf-8*dt);}
