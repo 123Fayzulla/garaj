@@ -1230,7 +1230,7 @@ var WLD=(function(){
  var CITY={x:850,z:-250,h:36,r:540,P:92,NX:8,NZ:7,BW:70};
  var RACE={x:-450,z:760,r:430};
  var LAKE={x:-720,z:-640,r:150};
- var PAD={x:-120,z:660,r:78};
+ var PAD={x:-55,z:700,r:78};
  function hash(ix,iz){var h=(ix*374761393+iz*668265263)|0;h=Math.imul(h^(h>>>13),1274126177);h=h^(h>>>16);return (h&0xffff)/65535;}
  function vn(x,z){var ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz,ux=fx*fx*(3-2*fx),uz=fz*fz*(3-2*fz),a=hash(ix,iz),b=hash(ix+1,iz),c=hash(ix,iz+1),d=hash(ix+1,iz+1);return a+(b-a)*ux+(c-a)*uz+(a-b-c+d)*ux*uz;}
  function fbm(x,z,o){var s=0,a=.5,f=1;for(var i=0;i<o;i++){s+=a*vn(x*f+i*17.3,z*f+i*9.1);f*=2.03;a*=.5;}return s;}
@@ -1238,7 +1238,7 @@ var WLD=(function(){
  function mix(a,b,t){return a+(b-a)*t;}
  var rs=1;function rnd(){rs=(rs*1664525+1013904223)>>>0;return rs/4294967296;}
  var RB=26; /* poyga zonasi balandligi */
- function baseH(x,z){
+ function baseH0(x,z){
   var r=Math.hypot(x,z),h=14+fbm(x*.0022,z*.0022,4)*130+fbm(x*.011,z*.011,3)*16-34;
   h+=sstep(1250,2200,r)*(150+130*fbm(x*.004+9,z*.004+3,3));
   var dr=Math.hypot(x-RACE.x,z-RACE.z);h=mix(h,RB+(fbm(x*.02,z*.02,2)-.5)*5,(1-sstep(300,720,dr))*.85);
@@ -1246,6 +1246,12 @@ var WLD=(function(){
   var dl=Math.hypot(x-LAKE.x,z-LAKE.z);h=mix(h,-7,sstep(LAKE.r+45,LAKE.r-45,dl));
   return h;
  }
+ /* ---------- SHER CHO‘QQISI: katta tosh tog‘, ustida tekis maydon, g‘arbga qaragan tosh maydoncha ---------- */
+ var MC={x:-100,z:-700},MR0=300,MR1=75,MBASE=40,MH=135,MTOP=MBASE+MH;
+ var PL={x0:MC.x-135,x1:MC.x-45,z0:MC.z-13,z1:MC.z+13,y:MTOP+.12};
+ function wrapPI(a){while(a>Math.PI)a-=6.2832;while(a<-Math.PI)a+=6.2832;return a;}
+ function mountF(x,z){var d=Math.hypot(x-MC.x,z-MC.z);if(d>=MR0)return 0;var f=Math.max(0,Math.min(1,(MR0-d)/(MR0-MR1)));f+=.8*(fbm(x*.012+3,z*.012+7,3)-.5)*f*(1-f)+.18*Math.sin(Math.atan2(z-MC.z,x-MC.x)*3+1.3)*f*(1-f)*(1-f);return Math.max(0,Math.min(1,f));}
+ function baseH(x,z){var h=baseH0(x,z),dm=Math.hypot(x-MC.x,z-MC.z);if(dm<650){var wb=(1-sstep(260,640,dm))*.96;h=mix(h,MBASE+(fbm(x*.02,z*.02,2)-.5)*5,wb);}var f=mountF(x,z);if(f>0)h=mix(h,MTOP,f);return h;}
  /* ---------- yo‘llar ---------- */
  var ROADS=[],RGRID={},RC=64;
  function catmull(pts,closed,seg){
@@ -1260,14 +1266,16 @@ var WLD=(function(){
   var L=acc[cnt0],ds=o.ds||2.5,cnt=Math.max(2,Math.round(L/ds));ds=L/(o.closed?cnt:cnt);var N=o.closed?cnt:cnt+1,smp=[];j=0;
   for(i=0;i<N;i++){var s=Math.min(L,i*ds);while(j<cnt0-1&&acc[j+1]<s)j++;var a2=dense[j],b2=dense[(j+1)%m],t4=acc[j+1]>acc[j]?(s-acc[j])/(acc[j+1]-acc[j]):0;smp.push({x:mix(a2[0],b2[0],t4),z:mix(a2[1],b2[1],t4),s:s,y:0,tx:1,tz:0});}
   for(i=0;i<N;i++){var pa=smp[o.closed?(i+N-1)%N:Math.max(0,i-1)],pb=smp[o.closed?(i+1)%N:Math.min(N-1,i+1)],dx=pb.x-pa.x,dz=pb.z-pa.z,l=Math.hypot(dx,dz)||1;smp[i].tx=dx/l;smp[i].tz=dz/l;}
-  var road={id:ROADS.length,style:o.style,closed:!!o.closed,half:o.half||7,len:L,smp:smp,ds:ds};
+  var road={id:ROADS.length,style:o.style,closed:!!o.closed,half:o.half||7,len:L,smp:smp,ds:ds,flat:o.flat||17,fade:o.fade||52};
   /* balandlik */
   if(o.style==="race"){for(i=0;i<N;i++){smp[i].y=RB+7*Math.sin(smp[i].s/L*6.2832*2+.6)+4*Math.sin(smp[i].s/L*6.2832*3+2.1);}}
   else if(o.style==="street"){for(i=0;i<N;i++)smp[i].y=CITY.h;}
   else{var ys=smp.map(function(p){return baseH(p.x,p.z);}),pass,k2;
    for(pass=0;pass<40;pass++){var ny=ys.slice();for(k2=0;k2<N;k2++)ny[k2]=(ys[Math.max(0,k2-1)]+ys[k2]*2+ys[Math.min(N-1,k2+1)])/4;ys=ny;}
-   var mxs=.07*ds;for(var sw=0;sw<3;sw++){for(k2=1;k2<N;k2++)ys[k2]=Math.max(ys[k2-1]-mxs,Math.min(ys[k2-1]+mxs,ys[k2]));for(k2=N-2;k2>=0;k2--)ys[k2]=Math.max(ys[k2+1]-mxs,Math.min(ys[k2+1]+mxs,ys[k2]));}
-   for(i=0;i<N;i++){var y0=o.y0,y1=o.y1,y=Math.max(4,ys[i]);if(y0!=null)y=mix(y0,y,sstep(0,160,smp[i].s));if(y1!=null)y=mix(y1,y,sstep(0,160,L-smp[i].s));smp[i].y=y;}}
+   var mxs=(o.maxGrade||.07)*ds;for(var sw=0;sw<3;sw++){for(k2=1;k2<N;k2++)ys[k2]=Math.max(ys[k2-1]-mxs,Math.min(ys[k2-1]+mxs,ys[k2]));for(k2=N-2;k2>=0;k2--)ys[k2]=Math.max(ys[k2+1]-mxs,Math.min(ys[k2+1]+mxs,ys[k2]));}
+   for(i=0;i<N;i++){var y0=o.y0,y1=o.y1,y=Math.max(4,ys[i]);if(y0!=null)y=mix(y0,y,sstep(0,320,smp[i].s));if(y1!=null)y=mix(y1,y,sstep(0,320,L-smp[i].s));smp[i].y=y;}
+   if(o.climb){var ia=0,ib=0,ba=1e18,bb=1e18;for(i=0;i<N;i++){var da=Math.hypot(smp[i].x-o.climb.a[0],smp[i].z-o.climb.a[1]),db=Math.hypot(smp[i].x-o.climb.b[0],smp[i].z-o.climb.b[1]);if(da<ba){ba=da;ia=i;}if(db<bb){bb=db;ib=i;}}
+    var ya=smp[ia].y,sa=smp[ia].s,sb2=smp[ib].s;for(i=ia;i<N;i++){var uu=i>=ib?1:(smp[i].s-sa)/(sb2-sa);smp[i].y=mix(ya,MTOP,uu);}}}
   ROADS.push(road);
   for(i=0;i<N;i++){var c=Math.floor(smp[i].x/RC)+","+Math.floor(smp[i].z/RC);(RGRID[c]||(RGRID[c]=[])).push([road.id,i]);}
   return road;
@@ -1297,25 +1305,35 @@ var WLD=(function(){
   for(i=0;i<=CITY.NX;i++){var x=X0+i*CITY.P;addRoad({style:"street",pts:[[x,Z0-40],[x,Z0+CITY.NZ*CITY.P+40]],half:7,ds:5,seg:2,vert:1});}
   for(i=0;i<=CITY.NZ;i++){var z=Z0+i*CITY.P;var e0=(i===3)?ext:40,e1=(i===3)?ext:40;addRoad({style:"street",pts:[[X0-e0,z],[X0+CITY.NX*CITY.P+e1,z]],half:7,ds:5,seg:2});}
   /* katta yo‘llar: poyga zonasi → chorraha → shahar; chorraha → ko‘l bo‘yi */
-  var gate=LOOP.smp[Math.round(LOOP.smp.length*.02)],yJ=baseH(120,150);
-  var zs=Z0+3*CITY.P,cityW=X0-ext;
-  var A=addRoad({style:"highway",pts:[[gate.x+gate.tz*0,gate.z-30],[-250,520],[-60,330],[120,150],[200,40],[255,-120],[285,-240],[cityW,zs]],half:7.5,ds:3,seg:20,y0:gate.y,y1:CITY.h});
-  var j=A.smp.reduce(function(b,p,k){var d=Math.hypot(p.x-120,p.z-150);return d<b[0]?[d,k]:b;},[1e9,0])[1];yJ=A.smp[j].y;
-  addRoad({style:"highway",pts:[[120,150],[-80,-80],[-300,-210],[-450,-340],[-560,-470]],half:7.5,ds:3,seg:20,y0:yJ});
-  addRoad({style:"highway",pts:[[X0+CITY.NX*CITY.P+ext,zs],[1420,-420],[1400,-570],[1300,-760]],half:7.5,ds:3,seg:20,y0:CITY.h});
+  var zs=Z0+3*CITY.P,cityW=X0-ext,TA=[-60,330];
+  /* poyga aylanasidan chiqish: aylanaga eng yaqin nuqtadan, yo‘lning chetiga perpendikulyar */
+  var jb=0,jd=1e18;LOOP.smp.forEach(function(p,k){var d=Math.hypot(p.x-TA[0],p.z-TA[1]);if(d<jd){jd=d;jb=k;}});
+  var lp=LOOP.smp[jb],nsg=((TA[0]-lp.x)*(-lp.tz)+(TA[1]-lp.z)*lp.tx)>0?1:-1,nx=-lp.tz*nsg,nz=lp.tx*nsg,off=LOOP.half+1.2+8.7+.2;
+  var s0=[lp.x+nx*off,lp.z+nz*off],s1=[s0[0]+nx*70,s0[1]+nz*70];
+  var A=addRoad({style:"highway",pts:[s0,s1,TA,[120,150],[200,40],[255,-130],[270,-230],[cityW-70,zs],[cityW,zs]],half:7.5,ds:3,seg:20,y0:lp.y,y1:CITY.h});
+  var j=A.smp.reduce(function(b,p,k){var d=Math.hypot(p.x-120,p.z-150);return d<b[0]?[d,k]:b;},[1e9,0])[1],pj=A.smp[j],yJ=pj.y;
+  /* cho‘qqi yo‘li: A yo‘lidan perpendikulyar ajraladi, tog‘ etagida spiralga aylanadi (1.5 aylanish) */
+  var bsg=((-300-pj.x)*(-pj.tz)+(-300-pj.z)*pj.tx)>0?1:-1,bx=-pj.tz*bsg,bz=pj.tx*bsg,bo=7.5+7.5+.4,b0=[pj.x+bx*bo,pj.z+bz*bo],b1=[b0[0]+bx*60,b0[1]+bz*60];
+  var pts=[b0,b1,[-110,-60],[-290,-250],[-420,-400],[-500,-540],[-470,-640],[MC.x-MR0+8,MC.z+70],[MC.x-MR0,MC.z]],nSp=130,k,Ea;
+  for(k=1;k<=nSp;k++){var tt=k/nSp,rr=MR0-(MR0-MR1)*tt,th=Math.PI+3*Math.PI*tt;pts.push([MC.x+rr*Math.cos(th),MC.z+rr*Math.sin(th)]);}
+  Ea=[MC.x+MR1,MC.z];
+  [[60,50],[10,68],[-45,45],[-80,6],[-112,0]].forEach(function(q){pts.push([MC.x+q[0],MC.z+q[1]]);});
+  addRoad({style:"highway",pts:pts,half:6.8,ds:3,seg:6,y0:yJ,maxGrade:.07,flat:8,fade:36,climb:{a:[MC.x-MR0,MC.z],b:Ea}});
+  addRoad({style:"highway",pts:[[X0+CITY.NX*CITY.P+ext,zs],[X0+CITY.NX*CITY.P+ext+60,zs],[1425,-420],[1400,-570],[1300,-760]],half:7.5,ds:3,seg:20,y0:CITY.h});
  }
  /* ---------- relyef ---------- */
  var HF=null;
- function roadBlend(x,z,h){var t=nearRoad(x,z);if(t.r>=0&&t.d<t.half+54){var w=1-sstep(t.half+17,t.half+52,t.d);h=mix(h,t.y-.12,w);}return h;}
+ function roadBlend(x,z,h){var t=nearRoad(x,z);if(t.r>=0){var rr=ROADS[t.r];if(t.d<t.half+rr.fade+2){var w=1-sstep(t.half+rr.flat,t.half+rr.fade,t.d);h=mix(h,t.y-.12,w);}}return h;}
  function buildHeights(){
   HF=new Float32Array((NG+1)*(NG+1));
   for(var j=0;j<=NG;j++)for(var i=0;i<=NG;i++){var x=-HALF+i*S,z=-HALF+j*S;HF[j*(NG+1)+i]=roadBlend(x,z,baseH(x,z));}
  }
- function heightAt(x,z){
+ function hgt(x,z){
   var fx=(x+HALF)/S,fz=(z+HALF)/S,i=Math.floor(fx),j=Math.floor(fz);if(i<0||j<0||i>=NG||j>=NG)return baseH(x,z);
   var u=fx-i,v=fz-j,a=HF[j*(NG+1)+i],b=HF[j*(NG+1)+i+1],c=HF[(j+1)*(NG+1)+i],d=HF[(j+1)*(NG+1)+i+1];
   return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v;
  }
+ function heightAt(x,z){var v=hgt(x,z);if(x>PL.x0&&x<PL.x1&&z>PL.z0&&z<PL.z1&&v<PL.y)return PL.y;return v;}
  /* ---------- to‘siqlar (aylana va to‘rtburchak) ---------- */
  var OC=[],OR=[],OG={},OCELL=30;
  function addC(x,z,r){var id=OC.length;OC.push([x,z,r]);var c=Math.floor(x/OCELL)+","+Math.floor(z/OCELL);(OG[c]||(OG[c]=[])).push([0,id]);}
@@ -1340,15 +1358,17 @@ var WLD=(function(){
  MB.prototype.t=function(a,b,c){this.cur.i.push(a,b,c);};
  MB.prototype.tri=function(A,B,C,col,al){this.need(3);var ux=B[0]-A[0],uy=B[1]-A[1],uz=B[2]-A[2],vx=C[0]-A[0],vy=C[1]-A[1],vz=C[2]-A[2],nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;var a1=this.v(A[0],A[1],A[2],nx,ny,nz,col[0],col[1],col[2],al),b1=this.v(B[0],B[1],B[2],nx,ny,nz,col[0],col[1],col[2],al),c1=this.v(C[0],C[1],C[2],nx,ny,nz,col[0],col[1],col[2],al);this.t(a1,b1,c1);};
  MB.prototype.quad=function(A,B,C,D,col,al){this.tri(A,B,C,col,al);this.tri(A,C,D,col,al);};
+ MB.prototype.triO=function(A,B,C,col,al,ref){var ux=B[0]-A[0],uy=B[1]-A[1],uz=B[2]-A[2],vx=C[0]-A[0],vy=C[1]-A[1],vz=C[2]-A[2],nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,mx=(A[0]+B[0]+C[0])/3-ref[0],my=(A[1]+B[1]+C[1])/3-ref[1],mz=(A[2]+B[2]+C[2])/3-ref[2];if(nx*mx+ny*my+nz*mz<0)this.tri(A,C,B,col,al);else this.tri(A,B,C,col,al);};
+ MB.prototype.quadO=function(A,B,C,D,col,al,ref){this.triO(A,B,C,col,al,ref);this.triO(A,C,D,col,al,ref);};
  function CM(x,z,cat){cat=cat||"n";var k=cat+Math.floor(x/CELL)+","+Math.floor(z/CELL);return cells[k]||(cells[k]={cat:cat,cx:(Math.floor(x/CELL)+.5)*CELL,cz:(Math.floor(z/CELL)+.5)*CELL,mb:new MB()});}
  /* yo‘naltirilgan quti (bino, tribuna, devor) */
  function obox(mb,cx,y0,cz,yaw,L,Wd,H,col,al,roof){
   var c=Math.cos(yaw),s=Math.sin(yaw),hl=L/2,hw=Wd/2;function P(u,v,y){return [cx+c*u-s*v,y,cz+s*u+c*v];}
   var A=P(-hl,-hw,y0),B=P(hl,-hw,y0),C=P(hl,hw,y0),D=P(-hl,hw,y0),A2=P(-hl,-hw,y0+H),B2=P(hl,-hw,y0+H),C2=P(hl,hw,y0+H),D2=P(-hl,hw,y0+H);
   var shade=function(k){return [col[0]*k,col[1]*k,col[2]*k];};
-  mb.need(30);mb.quad(A,B,B2,A2,shade(.92),al);mb.quad(B,C,C2,B2,shade(.8),al);mb.quad(C,D,D2,C2,shade(.92),al);mb.quad(D,A,A2,D2,shade(.8),al);mb.quad(A2,B2,C2,D2,roof||shade(1.08),al==null?1:(al>.95?1:.99));
+  var ref=[cx,y0+H/2,cz],rup=[cx,y0-80,cz];mb.need(30);mb.quadO(A,B,B2,A2,shade(.92),al,ref);mb.quadO(B,C,C2,B2,shade(.8),al,ref);mb.quadO(C,D,D2,C2,shade(.92),al,ref);mb.quadO(D,A,A2,D2,shade(.8),al,ref);mb.quadO(A2,B2,C2,D2,roof||shade(1.08),al==null?1:(al>.95?1:.99),rup);
  }
- W.CITY=CITY;W.RACE=RACE;W.LAKE=LAKE;W.PAD=PAD;W.HALF=HALF;W.BOUND=BOUND;W.ROADS=ROADS;
+ W.CITY=CITY;W.MC=MC;W.PL=PL;W.MTOP=MTOP;W.RACE=RACE;W.LAKE=LAKE;W.PAD=PAD;W.HALF=HALF;W.BOUND=BOUND;W.ROADS=ROADS;
 
  function treeMesh(mb,x,y,z,kind,sz,seed){
   var cr=.78+.35*((seed*7.7)%1),tone=(seed*3.1)%1,tr=[.33,.22,.12];
@@ -1386,11 +1406,12 @@ var WLD=(function(){
   var bands=st==="race"?[[-7.7,-6.75,"c"],[-6.75,-6.45,WHITE],[-6.45,-.18,ASPH],[-.18,.18,"d"],[.18,6.45,ASPH],[6.45,6.75,WHITE],[6.75,7.7,"c"]]
    :(st==="highway"?[[-8.7,-7.95,[.46,.46,.44]],[-7.95,-7.6,WHITE],[-7.6,-.2,ASPH],[-.2,.2,"d"],[.2,7.6,ASPH],[7.6,7.95,WHITE],[7.95,8.7,[.46,.46,.44]]]
    :[[-11,-7.4,[.7,.7,.67]],[-7.4,-.18,ASPH2],[-.18,.18,"d"],[.18,7.4,ASPH2],[7.4,11,[.7,.7,.67]]]);
-  var yo=.05+(st==="street"&&vert?.03:0),cnt=road.closed?N:N-1;
+  var yo=.1+(st==="street"&&vert?.07:0),cnt=road.closed?N:N-1;
   for(var i=0;i<cnt;i++){
    var p=smp[i],q=smp[(i+1)%N],mb=CM((p.x+q.x)/2,(p.z+q.z)/2,"r").mb,inter=false;
    if(st==="street"){var along=vert?p.z-Z0:p.x-X0,dd=((along%P)+P)%P;inter=Math.min(dd,P-dd)<12;}
    for(var b=0;b<bands.length;b++){
+    if(st==="street"&&inter&&(b===0||b===bands.length-1))continue;
     var bd=bands[b],c=bd[2];
     if(c==="c")c=(i%2===0)?RED:WHITE;else if(c==="d")c=(inter||(Math.floor(i/(st==="race"?2:(st==="highway"?2:1)))%2===1))?(st==="street"?ASPH2:ASPH):DASH;
     var a1=[p.x-p.tz*bd[0],p.y+yo,p.z+p.tx*bd[0]],a2=[p.x-p.tz*bd[1],p.y+yo,p.z+p.tx*bd[1]],b1=[q.x-q.tz*bd[0],q.y+yo,q.z+q.tx*bd[0]],b2=[q.x-q.tz*bd[1],q.y+yo,q.z+q.tx*bd[1]];
@@ -1402,6 +1423,122 @@ var WLD=(function(){
  function ring(mb,x,y,z,r,w,col,n){mb.need(n*4+2);for(var k=0;k<n;k++){var a1=k/n*6.2832,a2=(k+1)/n*6.2832,A=[x+Math.cos(a1)*(r-w),y,z+Math.sin(a1)*(r-w)],B=[x+Math.cos(a1)*(r+w),y,z+Math.sin(a1)*(r+w)],C=[x+Math.cos(a2)*(r+w),y,z+Math.sin(a2)*(r+w)],D=[x+Math.cos(a2)*(r-w),y,z+Math.sin(a2)*(r-w)];mb.quad(A,B,C,D,col);}}
  function cone(mb,x,y,z,r,h,col){var n=5,top=[x,y+h,z];mb.need(n*3);for(var k=0;k<n;k++){var a1=k/n*6.2832,a2=(k+1)/n*6.2832;mb.tri([x+Math.cos(a1)*r,y,z+Math.sin(a1)*r],top,[x+Math.cos(a2)*r,y,z+Math.sin(a2)*r],col);}}
  /* ---------- shahar ---------- */
+
+ /* ---------- mashhur binolar uchun oddiy shakllar ---------- */
+ function frus(mb,x,y,z,r0,r1,h,n,col,al,cap,ph,tx,tz){
+  ph=ph||0;tx=tx||0;tz=tz||0;mb.need(n*4+4);
+  for(var k=0;k<n;k++){var a1=ph+k/n*6.2832,a2=ph+(k+1)/n*6.2832,sh=.84+.16*Math.cos(a1+.7);
+   var A=[x+Math.cos(a1)*r0,y,z+Math.sin(a1)*r0],B=[x+Math.cos(a2)*r0,y,z+Math.sin(a2)*r0],C=[x+tx+Math.cos(a2)*r1,y+h,z+tz+Math.sin(a2)*r1],D=[x+tx+Math.cos(a1)*r1,y+h,z+tz+Math.sin(a1)*r1];
+   mb.quadO(A,B,C,D,[col[0]*sh,col[1]*sh,col[2]*sh],al,[x+tx*.5,y+h*.5,z+tz*.5]);
+   if(cap&&r1>.01)mb.triO([x+tx,y+h,z+tz],D,C,cap===true?col:cap,al,[x+tx,y-60,z+tz]);}
+ }
+ function dome(mb,x,y,z,r,col,n,rings,sy,al){
+  sy=sy||1;rings=rings||4;n=n||10;mb.need(n*rings*2+4);
+  for(var j=0;j<rings;j++){var f0=j/rings*1.5708,f1=(j+1)/rings*1.5708,r0=r*Math.cos(f0),r1=r*Math.cos(f1),h0=r*sy*Math.sin(f0),h1=r*sy*Math.sin(f1);
+   for(var k=0;k<n;k++){var a1=k/n*6.2832,a2=(k+1)/n*6.2832,sh=.86+.14*Math.cos(a1+.7)+.04*j;
+    mb.quadO([x+Math.cos(a1)*r0,y+h0,z+Math.sin(a1)*r0],[x+Math.cos(a2)*r0,y+h0,z+Math.sin(a2)*r0],[x+Math.cos(a2)*r1,y+h1,z+Math.sin(a2)*r1],[x+Math.cos(a1)*r1,y+h1,z+Math.sin(a1)*r1],[col[0]*sh,col[1]*sh,col[2]*sh],al,[x,y,z]);}}
+ }
+ function tbox(mb,x0,z0,w0,x1,z1,w1,y0,y1,col,al,roof){
+  var h0=w0/2,h1=w1/2,S=[[-1,-1],[1,-1],[1,1],[-1,1]],mx=(x0+x1)/2,mz=(z0+z1)/2,my=(y0+y1)/2;mb.need(20);
+  for(var k=0;k<4;k++){var a=S[k],b=S[(k+1)%4],sh=[.92,.8,.92,.8][k];
+   mb.quadO([x0+a[0]*h0,y0,z0+a[1]*h0],[x0+b[0]*h0,y0,z0+b[1]*h0],[x1+b[0]*h1,y1,z1+b[1]*h1],[x1+a[0]*h1,y1,z1+a[1]*h1],[col[0]*sh,col[1]*sh,col[2]*sh],al,[mx,my,mz]);}
+  if(w1>.3)mb.quadO([x1-h1,y1,z1-h1],[x1+h1,y1,z1-h1],[x1+h1,y1,z1+h1],[x1-h1,y1,z1+h1],roof||col,al,[x1,y1-60,z1]);
+ }
+ /* yo‘naltirilgan tekis panel (arka, soat, deraza) */
+ function panel(mb,cx,cz,yaw,u0,u1,v,y0,y1,col,ref){
+  var c=Math.cos(yaw),s=Math.sin(yaw);function P(u,y){return [cx+c*u-s*v,y,cz+s*u+c*v];}
+  mb.need(4);mb.quadO(P(u0,y0),P(u1,y0),P(u1,y1),P(u0,y1),col,1,ref||[cx,(y0+y1)/2,cz]);
+ }
+ var SAND=[.84,.72,.52],TURQ=[.1,.56,.63],GOLD=[.92,.74,.22],DARK=[.12,.14,.18],WHT=[.96,.95,.91],STONE=[.8,.72,.54];
+ var LANDMARKS=[];
+ function burj(mb,x,z,y0){
+  var G=[.64,.74,.86],tiers=[[19,16.5,58],[16.5,14,38],[14,11.8,34],[11.8,9.6,30],[9.6,7.6,28],[7.6,5.6,26],[5.6,3.8,22]],y=y0;
+  tiers.forEach(function(t,i){frus(mb,x,y,z,t[0],t[1],t[2],6,G,.78,i===6?[.85,.88,.93]:false,i*.35);y+=t[2];});
+  frus(mb,x,y,z,3.8,.4,40,6,[.88,.9,.94],1,false,0);addC(x,z,19.5);LANDMARKS.push({name:"Burj Xalifa (Dubay)",x:x,z:z});
+ }
+ function eiffel(mb,x,z,y0){
+  var I=[.42,.32,.24];
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(q){tbox(mb,x+q[0]*25,z+q[1]*25,6.6,x+q[0]*16,z+q[1]*16,4.6,y0,y0+38,I,1);tbox(mb,x+q[0]*16,z+q[1]*16,4.6,x+q[0]*8,z+q[1]*8,3,y0+38,y0+84,I,1);addC(x+q[0]*25,z+q[1]*25,3.5);});
+  obox(mb,x,y0+37,z,0,39,39,2.6,I,1,I);obox(mb,x,y0+83,z,0,20,20,2.2,I,1,I);
+  tbox(mb,x,z,7,x,z,3.2,y0+84,y0+112,I,1);frus(mb,x,y0+112,z,2.6,.2,28,4,I,1,false);
+  obox(mb,x,y0+16,z,0,32,32,.9,I,1,I);obox(mb,x,y0+60,z,0,14,14,.9,I,1,I);
+  LANDMARKS.push({name:"Eyfel minorasi (Parij)",x:x,z:z});
+ }
+ function tvTower(mb,x,z,y0){
+  var C=[.78,.78,.75],B=[.34,.46,.58];
+  frus(mb,x,y0,z,7,5,40,12,C,1,false);frus(mb,x,y0+40,z,5,3.9,66,12,C,1,false);
+  frus(mb,x,y0+106,z,3.9,11.5,8,12,C,1,false);frus(mb,x,y0+114,z,11.5,11.5,13,12,B,.78,[.55,.55,.58]);frus(mb,x,y0+127,z,11.5,4.2,7,12,C,1,[.6,.6,.62]);
+  for(var k=0;k<5;k++)frus(mb,x,y0+134+k*14,z,3.2-k*.3,2.9-k*.3,14,8,k%2?[.95,.95,.95]:[.86,.18,.16],1,false);
+  addC(x,z,7.5);LANDMARKS.push({name:"Toshkent teleminorasi",x:x,z:z});
+ }
+ function madrasa(mb,cx,cz,yaw,L,dome1){
+  var c=Math.cos(yaw),s=Math.sin(yaw);function P(u,v){return [cx+c*u-s*v,cz+s*u+c*v];}
+  obox(mb,cx,CITY.h+.03,cz,yaw,L,12,14.5,SAND,1,[.7,.58,.4]);
+  var pc=P(0,6.8);obox(mb,pc[0],CITY.h+.03,pc[1],yaw,15,2.4,20,SAND,1,[.72,.6,.42]);
+  var y=CITY.h+.03;panel(mb,cx,cz,yaw,-3.6,3.6,8.1,y+.2,y+13.2,DARK);panel(mb,cx,cz,yaw,-6.2,-4.4,8.1,y+1,y+18,TURQ);panel(mb,cx,cz,yaw,4.4,6.2,8.1,y+1,y+18,TURQ);panel(mb,cx,cz,yaw,-7.2,7.2,8.1,y+17.4,y+18.6,TURQ);
+  for(var u=-L/2+6;u<=L/2-5;u+=5.2){if(Math.abs(u)<9)continue;panel(mb,cx,cz,yaw,u-1.1,u+1.1,6.15,y+1,y+5.4,DARK);panel(mb,cx,cz,yaw,u-1.1,u+1.1,6.15,y+7.4,y+11.6,DARK);}
+  [-1,1].forEach(function(sd){var m=P(sd*(L/2-1.5),6);frus(mb,m[0],y,m[1],2.2,2,24,10,SAND,1,false);frus(mb,m[0],y+24,m[1],2.5,2.5,2,10,TURQ,1,false);dome(mb,m[0],y+26,m[1],2.5,TURQ,8,3,1.2,1);frus(mb,m[0],y+9,m[1],2.3,2.3,1.2,10,TURQ,1,false);frus(mb,m[0],y+15,m[1],2.3,2.3,1.2,10,TURQ,1,false);});
+  if(dome1){var d=P(0,-1);frus(mb,d[0],y+14.5,d[1],5.8,5.8,5,12,SAND,1,false);dome(mb,d[0],y+19.5,d[1],6.4,TURQ,12,4,1.3,1);}
+ }
+ function registan(mb,cx,cz){
+  var y=CITY.h+.03;mb.quad([cx-33,y+.04,cz-33],[cx-33,y+.04,cz+33],[cx+33,y+.04,cz+33],[cx+33,y+.04,cz-33],[.82,.74,.6]);
+  madrasa(mb,cx,cz+27,Math.PI,56,true);madrasa(mb,cx-27,cz,-1.5708,40,true);madrasa(mb,cx+27,cz,1.5708,40,true);
+  addR(cx-31,cz+20,cx+31,cz+34);addR(cx-34,cz-20,cx-20,cz+20);addR(cx+20,cz-20,cx+34,cz+20);
+  LANDMARKS.push({name:"Registon (Samarqand)",x:cx,z:cz});
+ }
+ function kalon(mb,cx,cz){
+  var y=CITY.h+.03,BR=[.74,.6,.38];
+  mb.quad([cx-33,y+.05,cz-33],[cx-33,y+.05,cz+33],[cx+33,y+.05,cz+33],[cx+33,y+.05,cz-33],[.4,.62,.3]);
+  frus(mb,cx,y,cz,5.2,4.5,12,12,BR,1,false);frus(mb,cx,y+12,cz,4.5,3.4,24,12,BR,1,false);
+  [12,19,26,33].forEach(function(h){frus(mb,cx,y+h,cz,4.9-(h-12)*.04,4.9-(h-12)*.04,1.4,12,TURQ,1,false);});
+  frus(mb,cx,y+36,cz,3.9,3.9,5,12,DARK,1,false,.2);frus(mb,cx,y+41,cz,4.2,.3,6,12,TURQ,1,[.2,.6,.65]);addC(cx,cz,5.3);
+  obox(mb,cx+20,y,cz-12,0,26,20,9,SAND,1,[.7,.58,.4]);dome(mb,cx+20,y+9,cz-12,8,TURQ,12,4,1,1);addR(cx+7,cz-22,cx+33,cz-2);
+  LANDMARKS.push({name:"Kalon minorasi (Buxoro)",x:cx,z:cz});
+ }
+ function temur(mb,cx,cz){
+  var y=CITY.h+.03,BZ=[.64,.5,.22];
+  disc(mb,cx,y+.06,cz,29,[.82,.8,.72],24);ring(mb,cx,y+.08,cz,27,.6,[.55,.55,.5],24);
+  for(var t=0;t<12;t++){var a=t/12*6.2832,tx=cx+Math.cos(a)*32,tz=cz+Math.sin(a)*32;treeMesh(mb,tx,y+.06,tz,1,.7,rnd());addC(tx,tz,.8);}
+  obox(mb,cx,y,cz,0,12,7,4,[.52,.52,.54],1,[.6,.6,.62]);obox(mb,cx,y+4,cz,0,8.4,4.4,2.6,[.6,.6,.62],1,[.66,.66,.68]);
+  obox(mb,cx,y+6.6,cz,0,5.6,1.9,2,BZ,1,BZ);
+  [[1.9,.7],[1.9,-.7],[-1.9,.7],[-1.9,-.7]].forEach(function(l){obox(mb,cx+l[0],y+6.6,cz+l[1],0,.5,.5,-0.01,BZ,1);obox(mb,cx+l[0],y+4.6,cz+l[1],0,.5,.5,2.1,BZ,1,BZ);});
+  tbox(mb,cx+2.6,cz,1.5,cx+3.8,cz,1,y+8.2,y+10.2,BZ,1);obox(mb,cx+4.1,y+9.6,cz,0,1.5,.9,.9,BZ,1,BZ);
+  obox(mb,cx-.4,y+8.5,cz,0,1.3,1.6,2,[.9,.78,.3],1,[.9,.78,.3]);obox(mb,cx-.4,y+10.5,cz,0,.8,.8,.8,GOLD,1,GOLD);
+  addC(cx,cz,6.5);LANDMARKS.push({name:"Amir Temur haykali (Toshkent)",x:cx,z:cz});
+ }
+ function taj(mb,cx,cz){
+  var y=CITY.h+.03,RS=[.6,.36,.28];
+  mb.quad([cx-34,y+.05,cz-34],[cx-34,y+.05,cz+34],[cx+34,y+.05,cz+34],[cx+34,y+.05,cz-34],[.36,.6,.3]);
+  obox(mb,cx,y,cz,0,50,50,1.7,RS,1,RS);obox(mb,cx,y+1.7,cz,0,42,42,1.2,WHT,1,WHT);var by=y+2.9;
+  frus(mb,cx,by,cz,15.5,15.5,17,8,WHT,1,[.9,.9,.86],.39);
+  [0,1.5708,3.1416,4.7124].forEach(function(a){var ax=Math.cos(a),az=Math.sin(a),px=cx+ax*15.5,pz=cz+az*15.5;obox(mb,px,by,pz,a,3,10,15.2,WHT,1,WHT);panel(mb,cx,cz,a,-3.4,3.4,17.2,by+.3,by+11.5,DARK);});
+  frus(mb,cx,by+17,cz,6.9,6.9,3.4,12,WHT,1,false);dome(mb,cx,by+20.4,cz,8.3,WHT,14,5,1.18,1);frus(mb,cx,by+30,cz,.5,.2,6,6,GOLD,1,GOLD);
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(q){var qx=cx+q[0]*11,qz=cz+q[1]*11;obox(mb,qx,by+17,qz,0,3.4,3.4,2.6,WHT,1,WHT);dome(mb,qx,by+19.6,qz,2.1,WHT,8,3,1.1,1);
+   var mx=cx+q[0]*23.5,mz=cz+q[1]*23.5;frus(mb,mx,y+1.7,mz,1.8,1.5,25,8,WHT,1,false);dome(mb,mx,y+27,mz,2.1,WHT,8,3,1.1,1);frus(mb,mx,y+26.7,mz,2.3,2.3,.6,8,[.85,.85,.82],1,false);addC(mx,mz,1.9);});
+  addR(cx-21,cz-21,cx+21,cz+21);
+  LANDMARKS.push({name:"Toj-Mahal (Hindiston)",x:cx,z:cz});
+ }
+ function bigben(mb,cx,cz){
+  var y=CITY.h+.03,tx=cx-10,tz=cz+6;
+  mb.quad([cx-33,y+.05,cz-33],[cx-33,y+.05,cz+33],[cx+33,y+.05,cz+33],[cx+33,y+.05,cz-33],[.5,.5,.48]);
+  tbox(mb,tx,tz,8.6,tx,tz,8.2,y,y+38,STONE,1);tbox(mb,tx,tz,9.8,tx,tz,9.8,y+38,y+50,[.88,.78,.56],1);
+  [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){var fx=tx+d[0]*4.95,fz=tz+d[1]*4.95,ang=Math.atan2(d[1],d[0]);
+   for(var k=0;k<2;k++){var rr=k?3.3:4.1,col=k?[.97,.95,.85]:[.2,.2,.22],n=10;for(var q=0;q<n;q++){var a1=q/n*6.2832,a2=(q+1)/n*6.2832,off=k*.12;function pp(a){var cu=Math.cos(a)*rr;return [fx+d[0]*off+(-d[1])*cu,y+44+Math.sin(a)*rr,fz+d[1]*off+(d[0])*cu];}mb.triO([fx+d[0]*off,y+44,fz+d[1]*off],pp(a1),pp(a2),col,1,[tx,y+44,tz]);}}});
+  tbox(mb,tx,tz,9.4,tx,tz,.4,y+50,y+66,[.3,.4,.38],1);frus(mb,tx,y+66,tz,.5,.1,5,4,GOLD,1,false);
+  obox(mb,cx+12,y,cz-4,0,46,15,10,STONE,1,[.5,.52,.5]);for(var u=-18;u<=18;u+=9)frus(mb,cx+12+u,y+10,cz-4,1.8,.2,6,6,[.35,.42,.4],1,false);
+  addR(tx-5,tz-5,tx+5,tz+5);addR(cx-11,cz-12,cx+35,cz+4);
+  LANDMARKS.push({name:"Big Ben (London)",x:tx,z:tz});
+ }
+ function pisa(mb,cx,cz){
+  var y=CITY.h+.03;mb.quad([cx-33,y+.05,cz-33],[cx-33,y+.05,cz+33],[cx+33,y+.05,cz+33],[cx+33,y+.05,cz-33],[.42,.64,.32]);
+  var W2=[.95,.93,.87],sh=0;
+  for(var k=0;k<8;k++){frus(mb,cx+k*.62,y+k*6.4,cz,6.4,6.3,6.4,14,W2,1,false,0,.62,0);frus(mb,cx+k*.62,y+k*6.4+1,cz,6.55,6.55,.7,14,[.62,.6,.55],1,false,0,.62,0);frus(mb,cx+k*.62,y+k*6.4+4.2,cz,6.55,6.55,.7,14,[.62,.6,.55],1,false,0,.62,0);}
+  frus(mb,cx+8*.62,y+51.2,cz,4.3,4.1,5.6,12,W2,1,false);frus(mb,cx+8*.62,y+56.8,cz,4.4,.4,3.4,12,[.55,.5,.45],1,[.55,.5,.45]);
+  addC(cx,cz,7);addC(cx+4,cz,6.5);
+  obox(mb,cx-18,y,cz-14,0,38,13,11,[.93,.91,.85],1,[.5,.48,.45]);dome(mb,cx-18,y+11,cz-14,6,[.6,.5,.4],10,3,1.1,1);addR(cx-37,cz-21,cx-1,cz-7);
+  LANDMARKS.push({name:"Piza minorasi (Italiya)",x:cx,z:cz});
+ }
+ var SPEC={"3,3":temur,"4,3":registan,"2,4":function(mb,cx,cz){burj(mb,cx,cz,CITY.h+.03);},"5,4":function(mb,cx,cz){tvTower(mb,cx,cz,CITY.h+.03);},"1,2":function(mb,cx,cz){eiffel(mb,cx,cz,CITY.h+.03);},"6,2":taj,"2,2":bigben,"5,2":kalon,"6,4":pisa};
  function buildCity(){
   var P=CITY.P,BW=CITY.BW,X0=CITY.x-CITY.NX*P/2,Z0=CITY.z-CITY.NZ*P/2,pal=[[.82,.78,.7],[.7,.72,.76],[.62,.54,.47],[.86,.85,.8],[.52,.57,.64],[.76,.6,.5],[.66,.7,.62]],i,k;
   rs=4242;var halfX=CITY.NX*P/2;
@@ -1411,25 +1548,26 @@ var WLD=(function(){
    mbk.quad([bx0,y0+.03,bz0],[bx0,y0+.03,bz1],[bx1,y0+.03,bz1],[bx1,y0+.03,bz0],[.66,.66,.63]);
    var f=Math.max(0,1-Math.hypot(bcx-CITY.x,bcz-CITY.z)/(halfX*.95)),plaza=(i===3||i===4)&&k===3&&false;
    var kind=rnd();
-   if(i===3&&k===3){ /* markaziy maydon: favvora */
-    mbk.quad([bx0,y0+.04,bz0],[bx0,y0+.04,bz1],[bx1,y0+.04,bz1],[bx1,y0+.04,bz0],[.74,.72,.66]);
-    disc(mbk,bcx,y0+.5,bcz,9,[.55,.55,.55],16);disc(mbk,bcx,y0+.62,bcz,7.6,[.25,.55,.72],16);cone(mbk,bcx,y0+.62,bcz,1.3,3.2,[.8,.8,.82]);addC(bcx,bcz,9.2);
-    for(var t=0;t<10;t++){var a=t/10*6.2832,tx=bcx+Math.cos(a)*24,tz=bcz+Math.sin(a)*24;treeMesh(mbk,tx,y0+.05,tz,1,.7,rnd());addC(tx,tz,.7);}
-    continue;}
+   if(SPEC[i+","+k]){var spf=SPEC[i+","+k];if(i+","+k!=="3,3"&&i+","+k!=="4,3"){}spf(mbk,bcx,bcz);continue;}
    if(kind<.13&&f<.7){ /* park */
     mbk.quad([bx0+2,y0+.05,bz0+2],[bx0+2,y0+.05,bz1-2],[bx1-2,y0+.05,bz1-2],[bx1-2,y0+.05,bz0+2],[.32,.58,.26]);
     for(var t2=0;t2<11;t2++){var tx2=bx0+8+rnd()*(BW-16),tz2=bz0+8+rnd()*(BW-16);treeMesh(mbk,tx2,y0+.06,tz2,rnd()<.4?0:1,.7+rnd()*.5,rnd());addC(tx2,tz2,.8);}
     continue;}
    var lay=Math.floor(rnd()*4),H0=12+60*Math.pow(f,1.3)*(.5+rnd()*.7)+rnd()*14,mg=5;
-   function bld(x0,z0,x1,z1,H,glass){var col=glass?[.3,.46,.6]:pal[Math.floor(rnd()*pal.length)],al=glass?.78:.9,w=x1-x0,d=z1-z0;
-    obox(mbk,(x0+x1)/2,y0+.03,(z0+z1)/2,0,w,d,H,col,al,[.36,.37,.4]);addR(x0,z0,x1,z1);
-    if(H>46){obox(mbk,(x0+x1)/2,y0+.03+H,(z0+z1)/2,0,w*.62,d*.62,H*.22,col,al,[.36,.37,.4]);}}
+   function bld(x0,z0,x1,z1,H,glass){var pc0=pal[Math.floor(rnd()*pal.length)],tn=.92+rnd()*.14,col=glass?[.3,.46,.6]:[pc0[0]*tn,pc0[1]*tn,pc0[2]*tn],al=glass?.78:.9,w=x1-x0,d=z1-z0,mx=(x0+x1)/2,mz=(z0+z1)/2,rf=[.42,.42,.45];
+    obox(mbk,mx,y0+.03,mz,0,w,d,H,col,al,rf);addR(x0,z0,x1,z1);var ty=y0+.03+H;
+    if(H>46){obox(mbk,mx,ty,mz,0,w*.7,d*.7,H*.2,col,al,rf);ty+=H*.2;if(H>66){obox(mbk,mx,ty,mz,0,w*.4,d*.4,H*.1,col,al,rf);ty+=H*.1;frus(mbk,mx,ty,mz,.5,.12,14,4,[.8,.8,.84],1,false);}}
+    else{if(rnd()<.7)obox(mbk,x0+w*.25,ty,z0+d*.3,0,w*.22,d*.2,2.4,[.62,.63,.66],1,[.7,.7,.72]);if(rnd()<.5)frus(mbk,x1-w*.25,ty,z1-d*.25,1.7,1.5,3,6,[.55,.4,.3],1,[.45,.32,.24]);}
+    obox(mbk,mx,ty-.5,mz,0,w+.8,d+.8,.7,[col[0]*.78,col[1]*.78,col[2]*.78],1,[col[0]*.9,col[1]*.9,col[2]*.9]);}
    var gl=f>.45&&rnd()<.5;
    if(lay===0)bld(bx0+mg,bz0+mg,bx1-mg,bz1-mg,H0,gl);
    else if(lay===1){var m1=bx0+BW*(.4+rnd()*.2);bld(bx0+mg,bz0+mg,m1-2,bz1-mg,H0,gl);bld(m1+2,bz0+mg,bx1-mg,bz1-mg,H0*(.55+rnd()*.6),false);}
    else if(lay===2){var mx=bcx,mz=bcz;bld(bx0+mg,bz0+mg,mx-2,mz-2,H0*(.6+rnd()*.5),false);bld(mx+2,bz0+mg,bx1-mg,mz-2,H0*(.6+rnd()*.7),gl);bld(bx0+mg,mz+2,mx-2,bz1-mg,H0*(.5+rnd()*.6),false);bld(mx+2,mz+2,bx1-mg,bz1-mg,H0*(.6+rnd()*.5),false);}
    else{bld(bx0+mg,bz0+mg,bx1-mg,bcz-2,H0*.8,false);bld(bx0+mg,bcz+2,bcx-2,bz1-mg,H0,gl);bld(bcx+2,bcz+2,bx1-mg,bz1-mg,H0*.6,false);}
   }
+  /* ko‘cha daraxtlari: markaziy ko‘chalar bo‘ylab */
+  ROADS.forEach(function(r){if(r.style!=="street")return;var key=r.vert?Math.round((r.smp[0].x-X0)/P):Math.round((r.smp[0].z-Z0)/P);if(key<2||key>5)return;var step2=Math.max(1,Math.round(24/r.ds));
+   for(var s2=3;s2<r.smp.length;s2+=step2){var p=r.smp[s2];[-1,1].forEach(function(sd){var tx=p.x-p.tz*sd*9.4,tz=p.z+p.tx*sd*9.4;if(tx<X0+10||tx>X0+CITY.NX*P-10||tz<Z0+10||tz>Z0+CITY.NZ*P-10)return;var dx=((tx-X0)%P+P)%P,dz=((tz-Z0)%P+P)%P;if(Math.min(dx,P-dx)<13&&Math.min(dz,P-dz)<13)return;if(Math.min(dx,P-dx)<13||Math.min(dz,P-dz)<13){}var mb=CM(tx,tz,"s").mb;treeMesh(mb,tx,CITY.h+.04,tz,1,.55,rnd());addC(tx,tz,.5);});}});
   /* ko‘cha chiroqlari */
   ROADS.forEach(function(r){if(r.style!=="street")return;var step=Math.max(1,Math.round(38/r.ds));
    for(var s=2;s<r.smp.length;s+=step){var p=r.smp[s];[-1,1].forEach(function(sd){var lx=p.x-p.tz*sd*7.9,lz=p.z+p.tx*sd*7.9;var inX=lx>X0+8&&lx<X0+CITY.NX*P-8&&lz>Z0+8&&lz<Z0+CITY.NZ*P-8;if(!inX)return;
@@ -1494,6 +1632,41 @@ var WLD=(function(){
    var c=Math.cos(yaw),s=Math.sin(yaw);function P(u,v,y){return [cx+c*u-s*v,y,cz+s*u+c*v];}
    var rc=[.6,.22,.16];mb.need(10);mb.quad(P(-4,-3.4,hy+3.1),P(4,-3.4,hy+3.1),P(4,0,hy+5),P(-4,0,hy+5),rc);mb.quad(P(4,3.4,hy+3.1),P(-4,3.4,hy+3.1),P(-4,0,hy+5),P(4,0,hy+5),[rc[0]*.85,rc[1]*.85,rc[2]*.85]);mb.tri(P(-4,-3.4,hy+3.1),P(-4,0,hy+5),P(-4,3.4,hy+3.1),[.58,.4,.26]);mb.tri(P(4,3.4,hy+3.1),P(4,0,hy+5),P(4,-3.4,hy+3.1),[.58,.4,.26]);addC(cx,cz,4.6);}
  }
+
+ /* ---------- cho‘qqi cho‘qqisidagi manzara maydonchasi: tosh platforma, ustunlar, to‘siqlar, sher haykali ---------- */
+ function lion(mb,x,y,z){
+  var G=[.88,.68,.28],M=[.5,.3,.12],k=1.7;
+  obox(mb,x,y+1.7*k,z,0,4.4*k,1.5*k,1.55*k,G,1,G);
+  [[1.5,.5],[1.5,-.5],[-1.5,.5],[-1.5,-.5]].forEach(function(l){obox(mb,x+l[0]*k,y,z+l[1]*k,0,.55*k,.55*k,1.75*k,G,1,G);});
+  obox(mb,x-2.4*k,y+2.6*k,z,0,1.6*k,1.2*k,1.2*k,G,1,G);obox(mb,x-3.0*k,y+2.9*k,z,0,.8*k,.9*k,.7*k,[.8,.6,.24],1,[.8,.6,.24]);
+  frus(mb,x-2.0*k,y+2.3*k,z,1.15*k,1.25*k,1.5*k,8,M,1,M,0);
+  obox(mb,x+2.5*k,y+2.6*k,z,0,2*k,.3*k,.3*k,G,1,G);obox(mb,x+3.4*k,y+2.55*k,z,0,.5*k,.55*k,.55*k,M,1,M);
+ }
+ function buildPeak(){
+  var mb=CM(MC.x-70,MC.z,"s").mb,top=MTOP,SA=[.8,.58,.38],SB=[.68,.46,.3],ST=[.78,.7,.56];
+  /* tepa maydon: tosh yo‘lak */
+  var mr=CM(MC.x,MC.z,"r").mb;disc(mr,MC.x,top+.1,MC.z,22,[.62,.6,.55],24);ring(mr,MC.x,top+.12,MC.z,14,.5,[.92,.92,.92],24);
+  /* tosh platforma (Sher shohi toshi kabi chiqib turgan) */
+  var cx=(PL.x0+PL.x1)/2,L=PL.x1-PL.x0;obox(mb,cx,top-6,MC.z,0,L,26,6.12,SA,1,ST);
+  /* tagidagi tosh ustun (qatlam-qatlam) */
+  var px=MC.x-118,gh=hgt(px,MC.z),hh=top-6-gh+2,segs=6,k;
+  for(k=0;k<segs;k++){var t0=k/segs,t1=(k+1)/segs;frus(mb,px,gh-1+hh*t0,MC.z,28-12*t0,28-12*t1,hh/segs+.6,7,k%2?SB:SA,1,false,k*.45);}
+  var px2=MC.x-80,gh2=hgt(px2,MC.z+4);frus(mb,px2,gh2-1,MC.z+4,17,12,top-6-gh2+1,7,SB,1,false,.3);
+  /* devor-to‘siq: tepa maydon chekkasi (shahar ko‘ruvchi yo‘l kirishi va platforma bundan mustasno) */
+  function wall(x,z,yaw,len){obox(mb,x,top,z,yaw,len,1.2,1.35,[.64,.57,.46],1,[.72,.66,.55]);addC(x+Math.cos(yaw)*len*.25,z+Math.sin(yaw)*len*.25,1.1);addC(x-Math.cos(yaw)*len*.25,z-Math.sin(yaw)*len*.25,1.1);}
+  for(var a=0;a<360;a+=4){var ar=a*Math.PI/180,wx=MC.x+Math.cos(ar)*76.5,wz=MC.z+Math.sin(ar)*76.5;
+   if(Math.abs(wrapPI(ar))<.34)continue;                     /* kirish (sharq) */
+   if(wx<MC.x&&Math.abs(wz-MC.z)<15.5)continue;               /* platforma burchagi */
+   wall(wx,wz,ar+1.5708,5.3);}
+  /* platforma yon va uchi */
+  for(var wxx=PL.x0+1;wxx<PL.x1-2;wxx+=5){wall(wxx+2.5,PL.z0+.6,0,5);wall(wxx+2.5,PL.z1-.6,0,5);}
+  for(var wzz=PL.z0+3;wzz<PL.z1-2;wzz+=5)wall(PL.x0+.6,wzz+2.5,1.5708,5);
+  /* sher haykali va poydevor */
+  obox(mb,MC.x-118,top+.12,MC.z,0,9,5.5,2.6,SA,1,ST);lion(mb,MC.x-118,top+.12+2.6,MC.z);addC(MC.x-118,MC.z,5);
+  /* tog‘ yonbag‘ridagi toshlar */
+  rs=5150;for(var q=0;q<90;q++){var ang=rnd()*6.2832,dd=95+rnd()*190,rx=MC.x+Math.cos(ang)*dd,rz=MC.z+Math.sin(ang)*dd,t=nearRoad(rx,rz);if(t.r>=0&&t.d<t.half+10)continue;rockMesh(CM(rx,rz).mb,rx,hgt(rx,rz),rz,1.6+rnd()*3.2,rnd());}
+  LANDMARKS.push({name:"Sher cho‘qqisi",x:MC.x,z:MC.z});LANDMARKS.push({name:"Manzara maydonchasi: ko‘l va tog‘lar",x:MC.x-95,z:MC.z});
+ }
  W.built=false;
  W.build=function(){
   if(W.built)return;
@@ -1507,25 +1680,26 @@ var WLD=(function(){
    else if(h<3.4){var q=sstep(1.2,3.4,h);r=mix(.78,.34,q);g=mix(.72,.54,q);b=mix(.5,.24,q);}
    else{r=.32+.13*nn;g=.52+.1*nn;b=.2+.06*nn;
     if(h>70){var q2=sstep(70,110,h);r=mix(r,.5,q2);g=mix(g,.48,q2);b=mix(b,.45,q2);}
-    if(h>130){var q3=sstep(130,170,h);r=mix(r,.95,q3);g=mix(g,.96,q3);b=mix(b,.98,q3);}
+    if(h>130){var q3=sstep(130,170,h)*(1-sstep(.02,.12,mountF(x,z)));r=mix(r,.95,q3);g=mix(g,.96,q3);b=mix(b,.98,q3);}
     if(slope>.2){var q4=sstep(.2,.42,slope);r=mix(r,.46,q4);g=mix(g,.42,q4);b=mix(b,.38,q4);}
     if(dr<5.5&&dr>1){var q5=sstep(5.5,1,dr)*.7;r=mix(r,.56,q5);g=mix(g,.5,q5);b=mix(b,.38,q5);}}
+   var mf=mountF(x,z);if(mf>.02){var mw=sstep(.03,.28,mf)*(1-sstep(.93,.995,mf)),st=.5+.5*Math.sin(h*.55+nn*4),rr2=.8-.13*st,gg2=.57-.11*st,bb2=.37-.09*st;if(slope<.12)mw*=.55;r=mix(r,rr2,mw*.92);g=mix(g,gg2,mw*.92);b=mix(b,bb2,mw*.92);}
    var dc=Math.hypot(x-CITY.x,z-CITY.z);if(dc<CITY.r+40){var wq=1-sstep(CITY.r-120,CITY.r+20,dc);r=mix(r,.56,wq);g=mix(g,.56,wq);b=mix(b,.54,wq);}
    pos.push(x,h,z);nor.push(nx,ny,nz);col.push(r,g,b,1);}
   var TI=[];for(j=0;j<NG;j++)for(i=0;i<NG;i++){var a=j*NV+i,b2=a+1,c2=a+NV,d2=c2+1;TI.push(a,c2,b2,b2,c2,d2);}
   W.terrain={p:pos,n:nor,c:col,i:TI};
   ROADS.forEach(roadMesh);
-  buildCity();buildRace();buildNature();
+  buildCity();buildRace();buildNature();buildPeak();
   /* uzoq tog‘lar */
   var M=new MB();rs=777;
   for(var k=0;k<64;k++){var an=k/64*6.2832+rnd()*.08,rd=2150+rnd()*1300,x=Math.cos(an)*rd,z=Math.sin(an)*rd,Hh=260+rnd()*520,Rr=220+rnd()*260,n=7,ph=rnd()*6,top=[x,Hh,z],snow=Hh>420;M.need(60);
    for(var q=0;q<n;q++){var a1=ph+q/n*6.2832,a2=ph+(q+1)/n*6.2832,A=[x+Math.cos(a1)*Rr,-20,z+Math.sin(a1)*Rr],B=[x+Math.cos(a2)*Rr,-20,z+Math.sin(a2)*Rr];M.tri(A,top,B,[.36,.4,.5-.05*(q%2)]);
     if(snow){var f=.7,A2=[mix(A[0],top[0],f),mix(A[1],top[1],f),mix(A[2],top[2],f)],B2=[mix(B[0],top[0],f),mix(B[1],top[1],f),mix(B[2],top[2],f)];M.tri(A2,top,B2,[.95,.96,1]);}}}
-  W.far=M.b;W.cells=cells;W.built=true;
+  W.far=M.b;W.cells=cells;W.LANDMARKS=LANDMARKS;W.built=true;
  };
  W.heightAt=heightAt;W.track=function(){return LOOP.smp;};W.trackLen=function(){return LOOP.len;};W.loopNear=loopNear;W.nearRoad=nearRoad;
- W.surface=function(x,z){var t=nearRoad(x,z);if(t.r>=0&&t.d<t.half+1.5)return {on:true,kind:"road"};if(Math.hypot(x-PAD.x,z-PAD.z)<PAD.r)return {on:true,kind:"pad"};return {on:false,kind:"off"};};
- W.zoneAt=function(x,z){if(Math.abs(x-CITY.x)<CITY.NX*CITY.P/2+40&&Math.abs(z-CITY.z)<CITY.NZ*CITY.P/2+40)return "Shahar";if(Math.hypot(x-RACE.x,z-RACE.z)<400||Math.hypot(x-PAD.x,z-PAD.z)<PAD.r+60)return "Poyga zonasi";return "Tabiat";};
+ W.surface=function(x,z){var t=nearRoad(x,z);if(t.r>=0&&t.d<t.half+1.5)return {on:true,kind:"road"};if(Math.hypot(x-PAD.x,z-PAD.z)<PAD.r)return {on:true,kind:"pad"};if(x>PL.x0&&x<PL.x1&&z>PL.z0&&z<PL.z1)return {on:true,kind:"pad"};return {on:false,kind:"off"};};
+ W.zoneAt=function(x,z){if(Math.abs(x-CITY.x)<CITY.NX*CITY.P/2+40&&Math.abs(z-CITY.z)<CITY.NZ*CITY.P/2+40)return "Shahar";if(Math.hypot(x-MC.x,z-MC.z)<300)return "Sher cho‘qqisi";if(Math.hypot(x-RACE.x,z-RACE.z)<400||Math.hypot(x-PAD.x,z-PAD.z)<PAD.r+60)return "Poyga zonasi";return "Tabiat";};
  W.spawn=function(){return {x:CITY.x,z:CITY.z-CITY.NZ*CITY.P/2+2.5*CITY.P,h:0};};
  W.bakeSize=function(){var n=0;for(var k in cells)n+=cells[k].mb.b.reduce(function(a,b){return a+b.i.length/3;},0);return n;};
 
@@ -1535,12 +1709,15 @@ var WLD=(function(){
   dusk:{zen:[.16,.12,.4],hor:[1,.6,.36],sun:[-.8,.16,.58],sunCol:[1.1,.62,.34],sky:[.45,.36,.52],gnd:[.3,.2,.2],fog:[.95,.62,.5],fogS:160,fogL:2200,cloud:[1,.72,.62],water:[.1,.18,.3]}
  };
  W.ENVS=ENVS;
+ var _eb=null;
+ function blendEnv(k){var a=ENVS.day,b=ENVS.dusk,o={};for(var key in a){var x=a[key],y=b[key];if(x.length!=null)o[key]=x.map(function(v,i){return v+(y[i]-v)*k;});else o[key]=x+(y-x)*k;}
+  var sl=Math.hypot(o.sun[0],o.sun[1],o.sun[2])||1;o.sun=[o.sun[0]/sl,o.sun[1]/sl,o.sun[2]/sl];return o;}
  var VS_W="attribute vec3 aP;attribute vec4 aN;attribute vec4 aC;uniform mat4 uVP;varying vec3 vP;varying vec3 vN;varying vec4 vC;void main(){vP=aP;vN=aN.xyz;vC=aC;gl_Position=uVP*vec4(aP,1.);}";
  var PRE="#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n";
- var FS_W=PRE+"varying vec3 vP;varying vec3 vN;varying vec4 vC;uniform vec3 uCam;uniform vec3 uSun;uniform vec3 uSunCol;uniform vec3 uSky;uniform vec3 uGnd;uniform vec3 uFog;uniform vec2 uFogD;"+
+ var FS_W=PRE+"varying vec3 vP;varying vec3 vN;varying vec4 vC;uniform vec3 uCam;uniform vec3 uSun;uniform vec3 uSunCol;uniform vec3 uSky;uniform vec3 uGnd;uniform vec3 uFog;uniform vec2 uFogD;uniform float uCY;"+
   "void main(){vec3 N=normalize(vN);float ndl=max(dot(N,uSun),0.);vec3 hem=mix(uGnd,uSky,N.y*.5+.5);float nz=sin(vP.x*.8)*sin(vP.z*.7)*.5+sin(vP.x*3.1+vP.z*2.3)*.25;vec3 base=vC.rgb*(1.+.06*nz);"+
-  "float isG=step(.7,vC.a)*(1.-step(.85,vC.a));float isB=step(.85,vC.a)*(1.-step(.95,vC.a));float wall=1.-smoothstep(.25,.55,abs(N.y));"+
-  "if((isG+isB)>.5&&wall>.5){float u=abs(N.x)>abs(N.z)?vP.z:vP.x;float cw=isG>.5?3.2:4.4,chh=isG>.5?3.5:3.7;vec2 g=vec2(fract(u/cw),fract(vP.y/chh));float win=step(.18,g.x)*step(g.x,.84)*step(.24,g.y)*step(g.y,.8);vec3 gl=mix(vec3(.1,.17,.26),uSky,.28+.25*g.y);base=mix(base,gl,win*(isG>.5?.93:.86));}"+
+  "float isG=step(.7,vC.a)*(1.-step(.85,vC.a));float isB=step(.85,vC.a)*(1.-step(.95,vC.a));float wall=1.-smoothstep(.25,.55,abs(N.y));float gfl=1.-step(5.4,vP.y-uCY);"+
+  "if((isG+isB)>.5&&wall>.5){float u=abs(N.x)>abs(N.z)?vP.z:vP.x;float cw=isG>.5?3.2:4.4,chh=isG>.5?3.5:3.7;vec2 g=vec2(fract(u/cw),fract(vP.y/chh));float win=step(.18,g.x)*step(g.x,.84)*step(.24,g.y)*step(g.y,.8);vec3 gl=mix(vec3(.1,.17,.26),uSky,.28+.25*g.y);base=mix(base,gl,win*(isG>.5?.93:.86));if(gfl>.5&&isB>.5){float u3=fract(u/7.);float sh=step(.12,u3)*step(u3,.9)*step(.5,vP.y-uCY)*(1.-step(3.6,vP.y-uCY));base=mix(base*.82,vec3(.1,.15,.2)+uSky*.12,sh);float aw=step(3.7,vP.y-uCY)*(1.-step(4.9,vP.y-uCY));vec3 awc=mix(vec3(.82,.2,.18),vec3(.95,.93,.9),step(.5,fract(u/1.6)));base=mix(base,awc,aw*.95);}}"+
   "vec3 c=base*(hem*.95+uSunCol*ndl*1.0);float d=length(vP-uCam);float f=clamp(1.-exp(-pow(max(d-uFogD.x,0.)/uFogD.y*2.2,1.3)),0.,1.);c=mix(c,uFog,f);gl_FragColor=vec4(c,1.);}";
  var VS_SKY="attribute vec2 aP;varying vec2 vQ;void main(){vQ=aP;gl_Position=vec4(aP,.9999,1.);}";
  var FS_SKY=PRE+"varying vec2 vQ;uniform vec3 uF;uniform vec3 uR;uniform vec3 uU;uniform vec2 uT;uniform vec3 uZen;uniform vec3 uHor;uniform vec3 uSun;uniform vec3 uSunCol;"+
@@ -1576,13 +1753,14 @@ var WLD=(function(){
   W.tCloud=tex(gl,function(c,w,h){c.clearRect(0,0,w,h);for(var k=0;k<9;k++){var x=w*(.15+.7*((k*37%100)/100)),y=h*(.5+.12*Math.sin(k*2.1)),r=h*(.28+.16*((k*53%100)/100)),g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(.55,"rgba(255,255,255,.5)");g.addColorStop(1,"rgba(255,255,255,0)");c.fillStyle=g;c.fillRect(0,0,w,h);}},256,96);
   W.tSoft=tex(gl,function(c,w,h){var g=c.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.5,"rgba(255,255,255,.45)");g.addColorStop(1,"rgba(255,255,255,0)");c.fillStyle=g;c.fillRect(0,0,w,h);},64,64);
   rs=99;W.clouds=[];for(var k=0;k<34;k++)W.clouds.push({x:(rnd()-.5)*7000,z:(rnd()-.5)*7000,y:700+rnd()*500,w:600+rnd()*800});
+  for(var k2=0;k2<12;k2++)W.clouds.push({x:MC.x+(rnd()-.5)*1300,z:MC.z+(rnd()-.5)*1100,y:MBASE+55+rnd()*70,w:300+rnd()*340,low:1});
   W.parts=[];
  };
  W.puff=function(x,y,z,vx,vy,vz,life,size,col,a){if(W.parts.length>90)W.parts.shift();W.parts.push({x:x,y:y,z:z,vx:vx,vy:vy,vz:vz,t:0,life:life,s:size,c:col,a:a});};
  W.draw=function(cam,tgt,fov,env,time,dt){
-  var gl=W.gl,cv=W.cv,Wd=cv.width,Hd=cv.height,e=W.ENVS[env]||ENVS.day;
+  var gl=W.gl,cv=W.cv,Wd=cv.width,Hd=cv.height,e=(typeof env==="number")?(env<.004?ENVS.day:blendEnv(Math.min(1,env))):(W.ENVS[env]||ENVS.day);
   gl.viewport(0,0,Wd,Hd);gl.disable(gl.BLEND);gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.clearColor(e.hor[0],e.hor[1],e.hor[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  var asp=Wd/Hd,vp=m4mul(m4persp(fov,asp,.5,7500),m4look(cam,tgt,[0,1,0]));
+  var asp=Wd/Hd,vp=m4mul(m4persp(fov,asp,1,7500),m4look(cam,tgt,[0,1,0]));
   var f=[tgt[0]-cam[0],tgt[1]-cam[1],tgt[2]-cam[2]],fl=Math.hypot(f[0],f[1],f[2]);f=[f[0]/fl,f[1]/fl,f[2]/fl];
   var r=[f[1]*0-f[2]*1,f[2]*0-f[0]*0,f[0]*1-f[1]*0];r=[-f[2],0,f[0]];var rl=Math.hypot(r[0],r[2]);r=[r[0]/rl,0,r[2]/rl];var u=[r[1]*f[2]-r[2]*f[1],r[2]*f[0]-r[0]*f[2],r[0]*f[1]-r[1]*f[0]];u=[-u[0],-u[1],-u[2]];
   /* up = right x forward ... (to‘g‘rilangan) */
@@ -1597,11 +1775,12 @@ var WLD=(function(){
   gl.enable(gl.DEPTH_TEST);
   /* dunyo */
   p=W.pW;gl.useProgram(p);gl.disable(gl.BLEND);
-  gl.uniformMatrix4fv(p.u.uVP,false,vp);gl.uniform3fv(p.u.uCam,cam);gl.uniform3fv(p.u.uSun,sun);gl.uniform3fv(p.u.uSunCol,e.sunCol);gl.uniform3fv(p.u.uSky,e.sky);gl.uniform3fv(p.u.uGnd,e.gnd);gl.uniform3fv(p.u.uFog,e.fog);gl.uniform2f(p.u.uFogD,e.fogS,e.fogL);
+  gl.uniformMatrix4fv(p.u.uVP,false,vp);gl.uniform3fv(p.u.uCam,cam);gl.uniform3fv(p.u.uSun,sun);gl.uniform3fv(p.u.uSunCol,e.sunCol);gl.uniform3fv(p.u.uSky,e.sky);gl.uniform3fv(p.u.uGnd,e.gnd);gl.uniform3fv(p.u.uFog,e.fog);gl.uniform2f(p.u.uFogD,e.fogS,e.fogL);gl.uniform1f(p.u.uCY,CITY.h);
   var aP=gl.getAttribLocation(p,"aP"),aN=gl.getAttribLocation(p,"aN"),aC=gl.getAttribLocation(p,"aC");
   function drawG(o){gl.bindBuffer(gl.ARRAY_BUFFER,o.pb);gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.nb);gl.enableVertexAttribArray(aN);gl.vertexAttribPointer(aN,4,gl.BYTE,true,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.cb);gl.enableVertexAttribArray(aC);gl.vertexAttribPointer(aC,4,gl.UNSIGNED_BYTE,true,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.ib);gl.drawElements(gl.TRIANGLES,o.n,gl.UNSIGNED_SHORT,0);}
   W.gm.forEach(drawG);W.farG.forEach(drawG);
-  W.cl.forEach(function(c){var vis=c.cat==='n'?1000:(c.cat==='r'?1800:2300),dx=c.cx-cam[0],dz=c.cz-cam[2];if(dx*dx+dz*dz>=(vis+212)*(vis+212))return;var fhl=Math.hypot(f[0],f[2])||1;if((dx*f[0]+dz*f[2])/fhl<-250)return;c.g.forEach(drawG);});
+  var fhl=Math.hypot(f[0],f[2])||1;gl.disable(gl.POLYGON_OFFSET_FILL);
+  [0,1].forEach(function(pass){if(pass===1){gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(-2,-8);}W.cl.forEach(function(c){if((c.cat==='r')!==(pass===1))return;var vis=c.cat==='n'?1000:(c.cat==='r'?1800:2300),dx=c.cx-cam[0],dz=c.cz-cam[2];if(dx*dx+dz*dz>=(vis+212)*(vis+212))return;if((dx*f[0]+dz*f[2])/fhl<-250)return;c.g.forEach(drawG);});});gl.disable(gl.POLYGON_OFFSET_FILL);
   /* suv */
   p=W.pWt;gl.useProgram(p);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
   gl.uniformMatrix4fv(p.u.uVP,false,vp);gl.uniform3fv(p.u.uCam,cam);gl.uniform3fv(p.u.uSun,sun);gl.uniform3fv(p.u.uSunCol,e.sunCol);gl.uniform3fv(p.u.uZen,e.zen);gl.uniform3fv(p.u.uHor,e.hor);gl.uniform3fv(p.u.uWater,e.water);gl.uniform3fv(p.u.uFog,e.fog);gl.uniform2f(p.u.uFogD,e.fogS,e.fogL);gl.uniform1f(p.u.uTime,time);
@@ -2035,7 +2214,7 @@ function buildMini(){
  x.lineJoin="round";
  WLD.ROADS.forEach(function(r){if(r.style==="street")return;x.strokeStyle=r.style==="race"?"rgba(255,120,110,.98)":"rgba(255,241,214,.95)";x.lineWidth=r.style==="race"?2.2:1.8;x.beginPath();r.smp.forEach(function(p,k){var q=P(p.x,p.z);if(k)x.lineTo(q[0],q[1]);else x.moveTo(q[0],q[1]);});if(r.closed)x.closePath();x.stroke();});
  var pd=P(WLD.PAD.x,WLD.PAD.z);x.fillStyle="rgba(255,150,60,.95)";x.beginPath();x.arc(pd[0],pd[1],2.2,0,6.2832);x.fill();
- x.fillStyle="rgba(255,255,255,.95)";x.font="bold 8px system-ui";x.textAlign="center";var cc=P(C.x,C.z);x.fillText("Shahar",cc[0],cc[1]+3);var rc=P(WLD.RACE.x,WLD.RACE.z);x.fillText("Poyga",rc[0],rc[1]+3);x.fillText("Tabiat",P(-300,-250)[0],P(-300,-250)[1]);
+ x.fillStyle="rgba(255,255,255,.95)";x.font="bold 8px system-ui";x.textAlign="center";var cc=P(C.x,C.z);x.fillText("Shahar",cc[0],cc[1]+3);var rc=P(WLD.RACE.x,WLD.RACE.z);x.fillText("Poyga",rc[0],rc[1]+3);x.fillText("Tabiat",P(-300,-250)[0],P(-300,-250)[1]);var mp=P(WLD.MC.x,WLD.MC.z);x.fillStyle="rgba(255,190,120,.95)";x.beginPath();x.moveTo(mp[0],mp[1]-4);x.lineTo(mp[0]+4,mp[1]+3);x.lineTo(mp[0]-4,mp[1]+3);x.fill();x.fillStyle="#fff";x.fillText("Cho‘qqi",mp[0],mp[1]+11);
  x.restore();
 }
 function beginWorld(){
@@ -2097,6 +2276,9 @@ function tick(now){
  var rr=Math.hypot(S.x,S.z),BD=WLD.BOUND;if(rr>BD){var nx=S.x/rr,nz=S.z/rr;S.x=nx*BD;S.z=nz*BD;var vn2=S.vx*nx+S.vz*nz;if(vn2>0){S.vx-=vn2*nx*1.6;S.vz-=vn2*nz*1.6;}if(DS.t-(DS.edgeT||-9)>3){DS.edgeT=DS.t;msg("Xarita chegarasi: orqaga qayting",1600);}}
  var sp=Math.hypot(S.vx,S.vz);S.top=Math.max(S.top,sp);S.odo+=sp*dt;
  S.y+=(WLD.heightAt(S.x,S.z)-S.y)*Math.min(1,dt*14);
+ /* mashhur joy nomi: yaqinlashganda chiqadi */
+ if(DS.t-(DS.lmT||0)>.5){DS.lmT=DS.t;var LM=WLD.LANDMARKS,lmn=null;for(var li=0;li<LM.length;li++){var ddx=S.x-LM[li].x,ddz=S.z-LM[li].z;if(ddx*ddx+ddz*ddz<80*80){lmn=LM[li].name;break;}}
+  if(lmn&&lmn!==DS.lmName){DS.lmName=lmn;msg("★ "+lmn,2600);}else if(!lmn)DS.lmName="";}
  /* zona nomi */
  var zn=WLD.zoneAt(S.x,S.z);if(zn!==DS.zone){DS.zone=zn;msg(zn,1500);}
  /* davra vaqti: start chizig‘idan o‘tganda o‘zi boshlanadi (faqat poyga aylanasida) */
@@ -2117,7 +2299,8 @@ function tick(now){
  var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
  DS.shake*=Math.pow(.02,dt);if(DS.shake>.02){cam[0]+=(Math.random()-.5)*DS.shake*.5;cam[1]+=(Math.random()-.5)*DS.shake*.5;}
  var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045);
- resize3d();WLD.draw(cam,tgt,fov,"day",DS.t,dt);
+ var dmn=Math.hypot(S.x-WLD.MC.x,S.z-WLD.MC.z),ek=Math.max(0,Math.min(1,(560-dmn)/340));ek=ek*ek*(3-2*ek);DS.ek=ek;
+ resize3d();WLD.draw(cam,tgt,fov,ek,DS.t,dt);
  /* chang va tutun */
  if(sp>5){var bx=S.x-fx*2.1,bz=S.z-fz*2.1;
   if(!onRoad&&Math.random()<dt*32){var d2=(Math.random()<.5?-1:1)*.9;WLD.puff(bx+rx*d2,S.y+.3,bz+rz*d2,-S.vx*.12+(Math.random()-.5)*2,1.2,-S.vz*.12+(Math.random()-.5)*2,1.1,1.8,[.62,.54,.4],.6);}
