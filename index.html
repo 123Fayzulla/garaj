@@ -214,6 +214,16 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 .rb::before{transform:scale(.8)}
 
 #drv{touch-action:none;-webkit-user-select:none;user-select:none}#drvCar{pointer-events:none}
+
+/* kattaroq va uzunroq o‘ng/chap tugmalar, TURBO, poyga tugmasi */
+.rb{width:94px;height:74px;border-radius:37px}.rb::before{transform:scale(1)}
+@media (orientation:portrait){.rb{width:80px;height:64px;border-radius:32px}}
+@media (orientation:landscape){.rb{width:96px;height:76px;border-radius:38px}}
+#pdTurbo{width:66px;height:66px;border-radius:50%;align-self:flex-end;margin-bottom:24px;background:radial-gradient(circle at 35% 30%,#ffe08a,#ff8a1f 58%,#c2410c);border:3px solid #2a1a45;box-shadow:0 4px 0 #2a1a45;font:900 12px/1 inherit;color:#2a1a45;letter-spacing:.4px;pointer-events:auto;touch-action:none;padding:0}
+#pdTurbo.on{transform:translateY(3px) scale(.96);box-shadow:0 1px 0 #2a1a45;filter:brightness(1.15) saturate(1.2)}
+@media (orientation:portrait){#ctlR{position:absolute}#pdTurbo{position:absolute;right:4px;bottom:118px;margin:0}}
+.hbtn.race{background:#ffb547;color:#2a1a45;border-color:#2a1a45;animation:racePulse 1.2s ease-in-out infinite}
+@keyframes racePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 </style>
 </head>
 <body>
@@ -262,7 +272,7 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 <div id="drv" hidden>
  <canvas id="w3d"></canvas><canvas id="drvFx"></canvas><canvas id="drvCar" width="512" height="320"></canvas>
  <div class="hud-top">
-  <div class="hud-l"><button class="hbtn" id="hExit">Chiqish</button><button class="hbtn" id="hReset">Qaytarish</button></div>
+  <div class="hud-l"><button class="hbtn" id="hExit">Chiqish</button><button class="hbtn" id="hReset">Qaytarish</button><button class="hbtn race" id="hRace" hidden>🏁 Poyga</button></div>
   <div class="hud-mid" id="hLapBox" hidden><small id="hLapNo"></small><b id="hLap"></b><small id="hBest"></small></div>
   <span></span>
  </div>
@@ -271,7 +281,7 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
  <div id="drvLoad" hidden>Dunyo yuklanmoqda…</div>
  <div id="hSpd"><b id="hKmh">0</b><small>km/soat</small></div>
  <div id="ctlL"><button class="rb l" id="stL" aria-label="Chapga"></button><button class="rb r" id="stR" aria-label="O‘ngga"></button></div>
- <div id="ctlR"><button class="pd brk" id="pdBrk">TORMOZ</button><button class="pd gas" id="pdGas">GAZ</button></div>
+ <div id="ctlR"><button class="turbo" id="pdTurbo">TURBO</button><button class="pd brk" id="pdBrk">TORMOZ</button><button class="pd gas" id="pdGas">GAZ</button></div>
 </div>
 <div id="toast" role="status"></div>
 <script>
@@ -1388,7 +1398,7 @@ var WLD=(function(){
   var shade=function(k){return [col[0]*k,col[1]*k,col[2]*k];};
   var ref=[cx,y0+H/2,cz],rup=[cx,y0-80,cz];mb.need(30);mb.quadO(A,B,B2,A2,shade(.92),al,ref);mb.quadO(B,C,C2,B2,shade(.8),al,ref);mb.quadO(C,D,D2,C2,shade(.92),al,ref);mb.quadO(D,A,A2,D2,shade(.8),al,ref);mb.quadO(A2,B2,C2,D2,roof||shade(1.08),al==null?1:(al>.95?1:.99),rup);
  }
- W.CITY=CITY;W.MC=MC;W.PL=PL;W.MTOP=MTOP;W.RACE=RACE;W.LAKE=LAKE;W.PAD=PAD;W.HALF=HALF;W.BOUND=BOUND;W.ROADS=ROADS;
+ W.CITY=CITY;W.loopHalf=function(){return LOOP.half;};W.MC=MC;W.PL=PL;W.MTOP=MTOP;W.RACE=RACE;W.LAKE=LAKE;W.PAD=PAD;W.HALF=HALF;W.BOUND=BOUND;W.ROADS=ROADS;
 
  function treeMesh(mb,x,y,z,kind,sz,seed){
   var cr=.78+.35*((seed*7.7)%1),tone=(seed*3.1)%1,tr=[.33,.22,.12];
@@ -1604,14 +1614,19 @@ var WLD=(function(){
   post(-pr);post(pr);
   for(var k=0;k<16;k++){var u0=-pr+(2*pr)*k/16,u1=-pr+(2*pr)*(k+1)/16,c=(k%2===0)?[.08,.08,.1]:[.95,.95,.95];var A=lat(s0,u0),B=lat(s0,u1);
    mbG.need(4);mbG.quad([A[0],gy+5.2,A[1]],[B[0],gy+5.2,B[1]],[B[0],gy+6.6,B[1]],[A[0],gy+6.6,A[1]],c);mbG.quad([B[0],gy+5.2,B[1]],[A[0],gy+5.2,A[1]],[A[0],gy+6.6,A[1]],[B[0],gy+6.6,B[1]],c);}
+  /* binolar yo‘lga tegmasligi uchun: to‘rtburchak burchaklari yo‘ldan H+9 m uzoq bo‘lguncha suriladi */
+  function clearOff(ci0,sd,off0,len0,v0,v1){var pc0=T[ci0],yw=Math.atan2(pc0.tz,pc0.tx),cu=Math.cos(yw),su=Math.sin(yw);
+   for(var add=0;add<90;add+=2){var ok=true;for(var uu=-len0/2;uu<=len0/2+.1&&ok;uu+=len0/10)for(var vv=v0;vv<=v1+.1&&ok;vv+=(v1-v0)/4){var cc0=lat(pc0,sd*(off0+add+vv)),x=cc0[0]+cu*uu,z=cc0[1]+su*uu;for(var kk=0;kk<N;kk+=2){var ddx=T[kk].x-x,ddz=T[kk].z-z;if(ddx*ddx+ddz*ddz<(H+9)*(H+9)){ok=false;break;}}}if(ok)return off0+add;}
+   return off0+90;}
   /* tribunalar (boshlang‘ich to‘g‘ri yo‘l bo‘ylab) */
-  var ci=18,pc=T[ci],yaw=Math.atan2(pc.tz,pc.tx),len=78;
+  var ci=18,pc=T[ci],yaw=Math.atan2(pc.tz,pc.tx),len=62;
   [1,-1].forEach(function(sd,idx){
    var seatc=idx===0?[[.2,.34,.78],[.78,.2,.2]]:[[.92,.7,.18],[.2,.5,.3]];
-   for(var r=0;r<5;r++){var off=sd*(H+14+r*3.4),c=lat(pc,off),y0=pc.y-.1,hgt=(r+1)*1.9;obox(CM(c[0],c[1],"s").mb,c[0],y0,c[1],yaw,len,3.4,hgt,seatc[r%2],1,[.75,.75,.78]);}
-   var cc=lat(pc,sd*(H+14+2*3.4)),roofY=pc.y+11.2;obox(CM(cc[0],cc[1],"s").mb,cc[0],roofY,cc[1],yaw,len+4,20,.6,[.88,.88,.9],1);
-   for(var q=-1;q<=1;q+=2)for(var q2=-1;q2<=1;q2+=2){var pp=lat(pc,sd*(H+14+2*3.4)+q2*8);var px=pp[0]+Math.cos(yaw)*q*len*.46,pz=pp[1]+Math.sin(yaw)*q*len*.46;obox(CM(px,pz,"s").mb,px,pc.y-.1,pz,0,.5,.5,11.4,[.6,.6,.62],1);}
-   for(var u=-len/2;u<=len/2;u+=7){var cx=lat(pc,sd*(H+14+2*3.4));addC(cx[0]+Math.cos(yaw)*u,cx[1]+Math.sin(yaw)*u,4.2);}
+   var SO=clearOff(ci,sd,H+14,len+6,-10,17);
+   for(var r=0;r<5;r++){var off=sd*(SO+r*3.4),c=lat(pc,off),y0=pc.y-.1,hgt=(r+1)*1.9;obox(CM(c[0],c[1],"s").mb,c[0],y0,c[1],yaw,len,3.4,hgt,seatc[r%2],1,[.75,.75,.78]);}
+   var cc=lat(pc,sd*(SO+2*3.4)),roofY=pc.y+11.2;obox(CM(cc[0],cc[1],"s").mb,cc[0],roofY,cc[1],yaw,len+4,20,.6,[.88,.88,.9],1);
+   for(var q=-1;q<=1;q+=2)for(var q2=-1;q2<=1;q2+=2){var pp=lat(pc,sd*(SO+2*3.4)+q2*8);var px=pp[0]+Math.cos(yaw)*q*len*.46,pz=pp[1]+Math.sin(yaw)*q*len*.46;obox(CM(px,pz,"s").mb,px,pc.y-.1,pz,0,.5,.5,11.4,[.6,.6,.62],1);}
+   for(var u=-len/2;u<=len/2;u+=7){var cx=lat(pc,sd*(SO+2*3.4));addC(cx[0]+Math.cos(yaw)*u,cx[1]+Math.sin(yaw)*u,4.2);}
   });
   /* start chizig‘idagi to‘siqlar va reklama taxtalari */
   for(var i=0;i<46;i+=3){var p=T[(N-12+i)%N];[1,-1].forEach(function(sd,idx){var c=lat(p,sd*(H+4.6)),col=[[.85,.15,.15],[.95,.95,.95],[.15,.35,.85],[.95,.75,.1]][(i/3+idx)%4|0];obox(CM(c[0],c[1],"s").mb,c[0],p.y,c[1],Math.atan2(p.tz,p.tx),7.6,.5,1.25,col,1);for(var w=-3;w<=3;w+=3)addC(c[0]+p.tx*w,c[1]+p.tz*w,.5);});}
@@ -1619,9 +1634,9 @@ var WLD=(function(){
   for(var j=8;j<N;j+=7){var a=Math.atan2(T[(j+4)%N].tz,T[(j+4)%N].tx),b=Math.atan2(T[(j-4+N)%N].tz,T[(j-4+N)%N].tx),d=a-b;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;
    if(Math.abs(d)>.14){var sd=d>0?-1:1,p2=T[j],c2=lat(p2,sd*(H+4.2));for(var h=0;h<3;h++)obox(CM(c2[0],c2[1],"s").mb,c2[0],p2.y+h*.9,c2[1],0,1.3,1.3,.9,h%2===0?[.85,.15,.15]:[.95,.95,.95],1);addC(c2[0],c2[1],.95);}}
   /* pit binosi */
-  var pt=T[ci],cp=lat(pt,-(H+30)),mbp=CM(cp[0],cp[1],"s").mb;obox(mbp,cp[0],pt.y-.1,cp[1],yaw,92,10,5.6,[.9,.9,.92],1,[.4,.4,.44]);
-  for(var u2=-40;u2<=40;u2+=10){var dp=lat(pt,-(H+30)+5.15),dxx=dp[0]+Math.cos(yaw)*u2,dzz=dp[1]+Math.sin(yaw)*u2;obox(mbp,dxx,pt.y-.1,dzz,yaw,6.4,.3,3.4,[.18,.18,.22],1);}
-  for(var u3=-46;u3<=46;u3+=6)addC(cp[0]+Math.cos(yaw)*u3,cp[1]+Math.sin(yaw)*u3,5.5);
+  var PO=clearOff(ci,-1,H+24,66,-6,6),pt=T[ci],cp=lat(pt,-PO),mbp=CM(cp[0],cp[1],"s").mb;obox(mbp,cp[0],pt.y-.1,cp[1],yaw,60,10,5.6,[.9,.9,.92],1,[.4,.4,.44]);
+  for(var u2=-25;u2<=25;u2+=10){var dp=lat(pt,-PO+5.15),dxx=dp[0]+Math.cos(yaw)*u2,dzz=dp[1]+Math.sin(yaw)*u2;obox(mbp,dxx,pt.y-.1,dzz,yaw,6.4,.3,3.4,[.18,.18,.22],1);}
+  for(var u3=-30;u3<=30;u3+=6)addC(cp[0]+Math.cos(yaw)*u3,cp[1]+Math.sin(yaw)*u3,5.5);
   /* drift maydoni */
   var mbd=CM(PAD.x,PAD.z,"r").mb,py=RB+.08;W.padY=py;
   disc(mbd,PAD.x,py+.06,PAD.z,PAD.r,[.22,.22,.25],40);ring(mbd,PAD.x,py+.08,PAD.z,PAD.r*.78,.45,[.92,.92,.92],40);ring(mbd,PAD.x,py+.08,PAD.z,PAD.r*.4,.45,[.92,.92,.92],28);ring(mbd,PAD.x,py+.08,PAD.z,PAD.r-1,.5,[.9,.2,.2],40);
@@ -1686,6 +1701,25 @@ var WLD=(function(){
   /* tog‘ yonbag‘ridagi toshlar */
   rs=5150;for(var q=0;q<90;q++){var ang=rnd()*6.2832,dd=95+rnd()*190,rx=MC.x+Math.cos(ang)*dd,rz=MC.z+Math.sin(ang)*dd,t=nearRoad(rx,rz);if(t.r>=0&&t.d<t.half+10)continue;rockMesh(CM(rx,rz).mb,rx,hgt(rx,rz),rz,1.6+rnd()*3.2,rnd());}
   LANDMARKS.push({name:"Sher cho‘qqisi",x:MC.x,z:MC.z});LANDMARKS.push({name:"Manzara maydonchasi: ko‘l va tog‘lar",x:MC.x-95,z:MC.z});
+ }
+
+ /* ---------- raqib mashinasi: dunyo ichida chiziladigan past poligonli sport mashina ---------- */
+ W.cars=[];
+ function carMesh(){
+  var mb=new MB(),B=[1,.52,.08],K=[.1,.1,.12],GL=[.16,.2,.27],R=Math.PI/2;
+  mb.quadO([-1.25,.14,-2.6],[1.25,.14,-2.6],[1.25,.14,2.6],[-1.25,.14,2.6],[.12,.12,.13],1,[0,-5,0]);
+  obox(mb,0,.28,0,R,4.5,1.96,.55,B,1,B);obox(mb,0,.83,-.2,R,3.5,1.86,.2,B,1,B);
+  function rhull(w0,l0,z0,y0,w1,l1,z1,y1,col,top){var A=[[-w0/2,y0,z0-l0/2],[w0/2,y0,z0-l0/2],[w0/2,y0,z0+l0/2],[-w0/2,y0,z0+l0/2]],T2=[[-w1/2,y1,z1-l1/2],[w1/2,y1,z1-l1/2],[w1/2,y1,z1+l1/2],[-w1/2,y1,z1+l1/2]],cc=[0,(y0+y1)/2,(z0+z1)/2];
+   for(var k=0;k<4;k++)mb.quadO(A[k],A[(k+1)%4],T2[(k+1)%4],T2[k],col,1,cc);mb.quadO(T2[0],T2[1],T2[2],T2[3],top||col,1,[0,y1-9,z1]);}
+  rhull(1.72,2.1,-.35,1.02,1.3,1.15,-.5,1.5,GL,B);
+  rhull(1.9,1.05,1.85,.83,1.7,.8,1.8,.95,B);
+  obox(mb,0,1.04,1.05,R,1.6,.4,.02,K,1,K);obox(mb,0,1.51,-.5,R,1.1,.35,.02,K,1,K);
+  [-.62,.62].forEach(function(x){obox(mb,x,1.03,-2.05,0,.12,.25,.38,K,1,K);});obox(mb,0,1.38,-2.1,R,.48,2.0,.09,K,1,K);
+  [-.62,.62].forEach(function(x){obox(mb,x,.55,2.25,0,.45,.06,.16,[1,.95,.75],1,[1,.95,.75]);obox(mb,x,.6,-2.25,0,.5,.06,.15,[.9,.1,.1],1,[.9,.1,.1]);});
+  [[-.99,1.45],[.99,1.45],[-.99,-1.45],[.99,-1.45]].forEach(function(w){var n=8,r=.37,x0=w[0]-.15,x1=w[0]+.15,cy=.37,cz=w[1];
+   for(var k=0;k<n;k++){var a1=k/n*6.2832,a2=(k+1)/n*6.2832,P=function(x,a){return [x,cy+Math.sin(a)*r,cz+Math.cos(a)*r];};mb.quadO(P(x0,a1),P(x0,a2),P(x1,a2),P(x1,a1),[.08,.08,.09],1,[w[0],cy,cz]);
+    var xo=w[0]<0?x0:x1;mb.triO([xo,cy,cz],P(xo,a1),P(xo,a2),[.72,.72,.76],1,[w[0]<0?x0+5:x1-5,cy,cz]);}});
+  return mb.b[0];
  }
  W.built=false;
  W.build=function(){
@@ -1764,6 +1798,8 @@ var WLD=(function(){
   function up(b){var o={n:b.i.length,pb:gl.createBuffer(),nb:gl.createBuffer(),cb:gl.createBuffer(),ib:gl.createBuffer()};
    var np=b.p.length/3,N4=new Int8Array(np*4),C4=new Uint8Array(np*4);for(var k=0;k<np;k++){N4[k*4]=Math.round(b.n[k*3]*127);N4[k*4+1]=Math.round(b.n[k*3+1]*127);N4[k*4+2]=Math.round(b.n[k*3+2]*127);C4[k*4]=Math.round(Math.min(1,b.c[k*4])*255);C4[k*4+1]=Math.round(Math.min(1,b.c[k*4+1])*255);C4[k*4+2]=Math.round(Math.min(1,b.c[k*4+2])*255);C4[k*4+3]=Math.round(Math.min(1,b.c[k*4+3])*255);}
    gl.bindBuffer(gl.ARRAY_BUFFER,o.pb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(b.p),gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,o.nb);gl.bufferData(gl.ARRAY_BUFFER,N4,gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,o.cb);gl.bufferData(gl.ARRAY_BUFFER,C4,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(b.i),gl.STATIC_DRAW);return o;}
+  var cm=carMesh();W.carM={src:cm,nv:cm.p.length/3,pb:gl.createBuffer(),nb:gl.createBuffer(),cb:gl.createBuffer(),ib:gl.createBuffer(),n:cm.i.length,P:new Float32Array(cm.p.length),Nn:new Int8Array(cm.p.length/3*4)};
+  (function(){var C4=new Uint8Array(cm.p.length/3*4);for(var k=0;k<cm.p.length/3;k++){C4[k*4]=Math.round(cm.c[k*4]*255);C4[k*4+1]=Math.round(cm.c[k*4+1]*255);C4[k*4+2]=Math.round(cm.c[k*4+2]*255);C4[k*4+3]=255;}gl.bindBuffer(gl.ARRAY_BUFFER,W.carM.cb);gl.bufferData(gl.ARRAY_BUFFER,C4,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,W.carM.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(cm.i),gl.STATIC_DRAW);})();
   W.gm=[up(W.terrain)];W.farG=W.far.map(up);W.cl=[];for(var ck in W.cells){var cc=W.cells[ck];W.cl.push({cat:cc.cat,cx:cc.cx,cz:cc.cz,g:cc.mb.b.filter(function(b){return b.i.length;}).map(up)});}
   /* ko‘l */
   var wp=[],wi=[],n=36;wp.push(LAKE.x,.15,LAKE.z);for(var k=0;k<=n;k++){var a=k/n*6.2832;wp.push(LAKE.x+Math.cos(a)*(LAKE.r+30),.15,LAKE.z+Math.sin(a)*(LAKE.r+30));if(k>0)wi.push(0,k,k+1);}
@@ -1801,6 +1837,10 @@ var WLD=(function(){
   W.gm.forEach(drawG);W.farG.forEach(drawG);
   var fhl=Math.hypot(f[0],f[2])||1;gl.disable(gl.POLYGON_OFFSET_FILL);
   [0,1].forEach(function(pass){if(pass===1){gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(-2,-8);}W.cl.forEach(function(c){if((c.cat==='r')!==(pass===1))return;var vis=c.cat==='n'?(W.visN||1000):(c.cat==='r'?1800:2300),dx=c.cx-cam[0],dz=c.cz-cam[2];if(dx*dx+dz*dz>=(vis+212)*(vis+212))return;if((dx*f[0]+dz*f[2])/fhl<-250)return;c.g.forEach(drawG);});});gl.disable(gl.POLYGON_OFFSET_FILL);
+  W.cars.forEach(function(d){var M=W.carM,src=M.src,ch=Math.cos(d.h),sh=Math.sin(d.h),cp=Math.cos(d.p||0),spp=Math.sin(d.p||0),rx=-ch,rz=sh,fx=sh,fz=ch;
+   for(var k=0;k<M.nv;k++){var x=src.p[k*3],y=src.p[k*3+1],z=src.p[k*3+2],y2=y*cp+z*spp,z2=z*cp-y*spp;M.P[k*3]=d.x+rx*x+fx*z2;M.P[k*3+1]=d.y+y2;M.P[k*3+2]=d.z+rz*x+fz*z2;
+    var nx=src.n[k*3],ny=src.n[k*3+1],nz=src.n[k*3+2],ny2=ny*cp+nz*spp,nz2=nz*cp-ny*spp;M.Nn[k*4]=Math.round((rx*nx+fx*nz2)*127);M.Nn[k*4+1]=Math.round(ny2*127);M.Nn[k*4+2]=Math.round((rz*nx+fz*nz2)*127);}
+   gl.bindBuffer(gl.ARRAY_BUFFER,M.pb);gl.bufferData(gl.ARRAY_BUFFER,M.P,gl.DYNAMIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,M.nb);gl.bufferData(gl.ARRAY_BUFFER,M.Nn,gl.DYNAMIC_DRAW);drawG(M);});
   /* suv */
   p=W.pWt;gl.useProgram(p);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
   gl.uniformMatrix4fv(p.u.uVP,false,vp);gl.uniform3fv(p.u.uCam,cam);gl.uniform3fv(p.u.uSun,sun);gl.uniform3fv(p.u.uSunCol,e.sunCol);gl.uniform3fv(p.u.uZen,e.zen);gl.uniform3fv(p.u.uHor,e.hor);gl.uniform3fv(p.u.uWater,e.water);gl.uniform3fv(p.u.uFog,e.fog);gl.uniform2f(p.u.uFogD,e.fogS,e.fogL);gl.uniform1f(p.u.uTime,time);
@@ -2186,7 +2226,7 @@ function init(){
 init();
 /* ===== HAYDASH: alohida 3D dunyo. Butunlay brauzerda ishlaydi, serverga so‘rov yubormaydi.
    Boshqaruv: faqat ◀ ▶ tugmalari, GAZ va TORMOZ. Davra vaqti start chizig‘idan o‘tganda o‘zi boshlanadi. ===== */
-var DS={res:1,fAvg:16,qT:0,lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
+var DS={rc:null,ai:null,turbo:false,res:1,fAvg:16,qT:0,lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
 function wrapA(a){while(a>Math.PI)a-=6.2832;while(a<-Math.PI)a+=6.2832;return a;}
 function fmtT(ms){if(!ms||ms<=0)return "–:––.–";var s=ms/1000,m=Math.floor(s/60);s-=m*60;return m+":"+(s<10?"0":"")+s.toFixed(1);}
 /* ---------- tovush ---------- */
@@ -2253,7 +2293,7 @@ function beginWorld(){
  cancelAnimationFrame(DS.raf);DS.raf=requestAnimationFrame(tick);
 }
 function quit(){
- DS.on=false;DRV.on=false;cancelAnimationFrame(DS.raf);auStop();$("drv").hidden=true;$("drvLoad").hidden=true;$("top").style.display="";
+ DS.on=false;DRV.on=false;cancelAnimationFrame(DS.raf);DS.rc=null;DS.ai=null;try{WLD.cars=[];}catch(e){}if($("hRace"))$("hRace").hidden=true;auStop();$("drv").hidden=true;$("drvLoad").hidden=true;$("top").style.display="";
  try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen();if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();}catch(e){}
  LOT.dirty=true;
 }
@@ -2262,10 +2302,72 @@ function stopDrive(){
  var xy=cellXY(DS.item);LOT.anim={t0:performance.now(),dur:700,fx:LOT.cam.x,fy:LOT.cam.y,fd:LOT.cam.d,tx:xy[0],ty:xy[1]-CH*.35,td:14};
 }
 function msg(t,ms){var m=$("hMsg");m.textContent=t;m.hidden=false;DS.msgT=ms||2200;}
+
+/* ---------- RAQIB BILAN POYGA: start chizig‘ida kutib turgan mashina ideal yo‘ldan yuradi ---------- */
+var RL=null,LAPS=2,AI_VMAX=92,AI_ACC=13,AI_DEC=17,AI_LAT=19,LANE=3.1;
+function buildRL(){
+ var T=WLD.track(),N=T.length,H=WLD.loopHalf()-1.8,o=new Float32Array(N),i,it,K=5;
+ for(it=0;it<320;it++)for(i=0;i<N;i++){var ia=(i-K+N)%N,ib=(i+K)%N,a=T[ia],b=T[ib],mx=(a.x-a.tz*o[ia]+b.x-b.tz*o[ib])/2,mz=(a.z+a.tx*o[ia]+b.z+b.tx*o[ib])/2,p=T[i],v=(mx-p.x)*(-p.tz)+(mz-p.z)*p.tx;o[i]=Math.max(-H,Math.min(H,o[i]+(v-o[i])*.5));}
+ var px=new Float32Array(N),pz=new Float32Array(N),ln=new Float32Array(N),vl=new Float32Array(N);
+ for(i=0;i<N;i++){px[i]=T[i].x-T[i].tz*o[i];pz[i]=T[i].z+T[i].tx*o[i];}
+ for(i=0;i<N;i++){var j=(i+1)%N;ln[i]=Math.hypot(px[j]-px[i],pz[j]-pz[i])||.1;}
+ for(i=0;i<N;i++){var a0=(i-4+N)%N,b0=(i+4)%N,h1=Math.atan2(px[i]-px[a0],pz[i]-pz[a0]),h2=Math.atan2(px[b0]-px[i],pz[b0]-pz[i]),dh=wrapA(h2-h1),dist=0;for(var q=-4;q<4;q++)dist+=ln[(i+q+N)%N];var kap=Math.abs(dh)/Math.max(1,dist);vl[i]=Math.min(AI_VMAX,Math.sqrt(AI_LAT/Math.max(kap,1e-4)));}
+ for(var pass=0;pass<3;pass++){for(i=N-1;i>=0;i--){var n2=(i+1)%N;vl[i]=Math.min(vl[i],Math.sqrt(vl[n2]*vl[n2]+2*AI_DEC*ln[i]));}for(i=0;i<N;i++){var n3=(i+1)%N;vl[n3]=Math.min(vl[n3],Math.sqrt(vl[i]*vl[i]+2*AI_ACC*ln[i]));}}
+ RL={o:o,px:px,pz:pz,ln:ln,v:vl,N:N};
+}
+function gridIdx(){return RL.N-16;}
+/* raqib holati: F = aylana bo‘ylab kasr indeks (bir necha aylanaga ham ortadi) */
+function aiPose(F,laneW){
+ var T=WLD.track(),N=RL.N,f=((F%N)+N)%N,i=Math.floor(f),t=f-i,j=(i+1)%N,oi=RL.o[i]*laneW+LANE*(1-laneW),oj=RL.o[j]*laneW+LANE*(1-laneW);
+ var ax=T[i].x-T[i].tz*oi,az=T[i].z+T[i].tx*oi,bx=T[j].x-T[j].tz*oj,bz=T[j].z+T[j].tx*oj,len=Math.hypot(bx-ax,bz-az)||.1;
+ return {x:ax+(bx-ax)*t,z:az+(bz-az)*t,y:T[i].y+(T[j].y-T[i].y)*t,h:Math.atan2(bx-ax,bz-az),p:Math.atan2(T[j].y-T[i].y,len),len:len};
+}
+function playerGrid(){var T=WLD.track(),g=T[gridIdx()],o=-LANE;return {x:g.x-g.tz*o,z:g.z+g.tx*o,y:g.y,h:Math.atan2(g.tx,g.tz)};}
+function startRace(){
+ if(!RL)buildRL();var S=DS.S,g=playerGrid();
+ S.x=g.x;S.z=g.z;S.y=g.y;S.h=g.h;S.camH=g.h;S.vx=S.vz=0;S.camY=g.y+3;DS.steer=DS.steerT=0;DS.lookYaw=DS.lookPitch=0;
+ DS.ai={F:gridIdx(),v:0,fin:0};DS.rc={phase:"count",t0:performance.now(),pF:gridIdx(),res:null,offT:0};
+ $("hRace").hidden=true;$("hLapBox").hidden=false;$("hLapNo").textContent="Raqib bilan poyga";$("hBest").textContent=LAPS+" davra";msg("Tayyorlaning!",1500);tone(440,440,.18,"square",.08);
+}
+function endRace(text,ms){if(!DS.rc)return;DS.rc.phase="done";DS.rc.tEnd=performance.now();msg(text,ms||5000);}
+function raceTick(now,dt,S,sp){
+ var nearZone=Math.hypot(S.x-WLD.RACE.x,S.z-WLD.RACE.z)<900;
+ if(!nearZone&&(!DS.rc||DS.rc.phase==="idle")){if(WLD.cars.length)WLD.cars=[];$("hRace").hidden=true;return;}
+ if(!RL)buildRL();
+ if(!DS.rc)DS.rc={phase:"idle"};if(!DS.ai)DS.ai={F:gridIdx(),v:0,fin:0};
+ var rc=DS.rc,ai=DS.ai,N=RL.N,g=gridIdx();
+ if(rc.phase==="idle"){ai.F=g;ai.v=0;
+  var pg=playerGrid(),dg=Math.hypot(S.x-pg.x,S.z-pg.z);$("hRace").hidden=!(dg<60&&sp<14);}
+ else if(rc.phase==="count"){var el=now-rc.t0,pg2=playerGrid();S.x=pg2.x;S.z=pg2.z;S.vx=S.vz=0;S.h=pg2.h;
+  var c=3-Math.floor(el/1000);if(c!==rc.lastC){rc.lastC=c;if(c>0){$("hLap").textContent=String(c);tone(520,520,.15,"square",.09);}else{$("hLap").textContent="START!";tone(880,880,.35,"square",.1);}}
+  if(el>=3000){rc.phase="run";rc.tGo=now;rc.pF=g;DS.ti=g;}}
+ else if(rc.phase==="run"||rc.phase==="done"){
+  /* raqib: tezlik profili bo‘yicha */
+  if(rc.phase==="run"||ai.F<N+LAPS*N){var fi=((Math.floor(ai.F)%N)+N)%N,tv=ai.F>=N+LAPS*N?0:RL.v[fi];
+   if(ai.v<tv)ai.v=Math.min(tv,ai.v+AI_ACC*dt*(1-ai.v/(AI_VMAX*1.6)));else ai.v=Math.max(tv,ai.v-AI_DEC*1.15*dt);
+   ai.F+=ai.v*dt/RL.ln[fi];}
+  /* o‘yinchi: aylana bo‘ylab yurgan masofa */
+  var lp=WLD.loopNear(S.x,S.z,DS.ti);
+  if(lp&&lp.d<30){DS.ti=lp.i;var cur=((Math.floor(rc.pF)%N)+N)%N,di=lp.i-cur;if(di>N/2)di-=N;if(di<-N/2)di+=N;if(Math.abs(di)<40)rc.pF+=di;rc.offT=0;}else rc.offT+=dt;
+  if(rc.phase==="run"){
+   var tEl=now-rc.tGo,pl=Math.max(0,Math.min(LAPS,Math.floor((rc.pF-N)/N)+1)),pos=rc.pF>=ai.F?1:2;
+   $("hLap").textContent=fmtT(tEl);$("hLapNo").textContent="Davra "+Math.max(1,Math.min(LAPS,pl))+"/"+LAPS;$("hBest").textContent="O‘rin: "+pos+"/2";
+   var pDone=rc.pF>=N+LAPS*N,aDone=ai.F>=N+LAPS*N;
+   if(pDone&&!aDone){tone(660,990,.4,"triangle",.14);endRace("🏆 G‘alaba! Vaqt: "+fmtT(tEl),6000);}
+   else if(aDone&&!pDone){tone(300,200,.4,"sawtooth",.08);endRace("Raqib yutdi. Yana urinib ko‘ring!",6000);}
+   else if(pDone&&aDone)endRace("Durang!",5000);
+   if(rc.offT>8)endRace("Poyga bekor qilindi (yo‘ldan chiqdingiz)",3500);}
+  else if(now-rc.tEnd>7000){DS.rc={phase:"idle"};ai.F=g;ai.v=0;$("hLapBox").hidden=true;}
+ }
+ /* raqibni chizish va to‘qnashuv */
+ var lw=Math.max(0,Math.min(1,(ai.F-g)/40)),ps=aiPose(ai.F,rc.phase==="idle"||rc.phase==="count"?0:lw);
+ WLD.cars=[{x:ps.x,y:ps.y,z:ps.z,h:ps.h,p:ps.p}];DS.aiPos=ps;
+ var dx=S.x-ps.x,dz=S.z-ps.z,dd=Math.hypot(dx,dz);if(dd<2.6&&dd>.01){var pen=2.6-dd;S.x+=dx/dd*pen;S.z+=dz/dd*pen;var vn=(S.vx*dx+S.vz*dz)/dd;if(vn<0){S.vx-=vn*dx/dd*1.2;S.vz-=vn*dz/dd*1.2;}DS.shake=Math.max(DS.shake,.3);}
+}
 /* ---------- har kadr ---------- */
 function tick(now){
  if(!DS.on)return;DS.raf=requestAnimationFrame(tick);
- var raw=now-DS.last,dt=Math.min(.05,raw/1000||.016);DS.last=now;DS.t+=dt;
+ var raw=now-DS.last,dt=Math.min(.05,raw/1000||.016);DS.dtMs=Math.min(100,raw||16.7);DS.last=now;DS.t+=dt;
  if(raw>0&&raw<400){DS.fAvg=(DS.fAvg||16)*.94+raw*.06;if(now-(DS.qT||0)>2200){DS.qT=now;var mx=Math.min(window.devicePixelRatio||1,1.5);
   if(DS.fAvg>30&&DS.res>.55){DS.res=Math.max(.7,DS.res-.15);}else if(DS.fAvg>30&&DS.res<=.71){WLD.visN=Math.max(600,(WLD.visN||1000)-150);}
   else if(DS.fAvg<18){if((WLD.visN||1000)<1000)WLD.visN=Math.min(1000,(WLD.visN||1000)+100);else if(DS.res<mx)DS.res=Math.min(mx,DS.res+.1);}}}
@@ -2277,14 +2379,15 @@ function tick(now){
  var fx=Math.sin(S.h),fz=Math.cos(S.h),rx=-fz,rz=fx;
  var vf=S.vx*fx+S.vz*fz,vl=S.vx*rx+S.vz*rz;
  var sf=WLD.surface(S.x,S.z),onRoad=sf.on;
- var gas=DS.gas||k.u,brk=DS.brake||k.d;
- var vmaxE=onRoad?cfg.v:cfg.v*.58,grip=onRoad?8.5:4;
+ var counting=DS.rc&&DS.rc.phase==="count",turbo=(DS.turbo||k.t)&&!counting,gas=(DS.gas||k.u||turbo)&&!counting,brk=DS.brake||k.d;DS.turboOn=turbo;
+ var vmaxE=onRoad?(turbo?138.9:cfg.v):cfg.v*.58,grip=onRoad?8.5:4;
  var h0=WLD.heightAt(S.x,S.z),hf=WLD.heightAt(S.x+fx*2,S.z+fz*2),slope=(hf-h0)/2;
  if(brk){if(vf>.8)vf-=36*dt;else vf=Math.max(-8,vf-8*dt);}
+ else if(turbo&&onRoad){vf+=31*Math.max(0,1-Math.pow(Math.max(0,vf)/138.9,14))*dt*(vf<0?2:1);}
  else if(gas){vf+=cfg.a*Math.max(0,1-Math.max(0,vf)/vmaxE)*dt*(vf<0?2:1);}
  else{vf-=Math.sign(vf)*Math.min(Math.abs(vf),3.4*dt);}
  vf-=9.8*slope*.45*dt;
- if(vf>vmaxE)vf-=(vf-vmaxE)*1.8*dt;
+ if(vf>vmaxE)vf-=(vf-vmaxE)*(turbo?0:.45)*dt;
  vf-=vf*Math.abs(vf)*.00004*dt;
  vl*=Math.exp(-grip*dt);
  /* o‘ngga burilganda yo‘nalish soat strelkasi bo‘yicha (h kamayadi) */
@@ -2306,7 +2409,7 @@ function tick(now){
  /* zona nomi */
  var zn=WLD.zoneAt(S.x,S.z);if(zn!==DS.zone){DS.zone=zn;msg(zn,1500);}
  /* davra vaqti: start chizig‘idan o‘tganda o‘zi boshlanadi (faqat poyga aylanasida) */
- var inRace=Math.hypot(S.x-WLD.RACE.x,S.z-WLD.RACE.z)<400,lp=inRace?WLD.loopNear(S.x,S.z,DS.ti):null;
+ var inRace=(!DS.rc||DS.rc.phase==="idle")&&Math.hypot(S.x-WLD.RACE.x,S.z-WLD.RACE.z)<400,lp=inRace?WLD.loopNear(S.x,S.z,DS.ti):null;
  if(lp&&lp.d<22){DS.ti=lp.i;var s=T[lp.i].s,ds=DS.prevS<0?0:s-DS.prevS;if(ds>TL/2)ds-=TL;else if(ds<-TL/2)ds+=TL;
   if(DS.prevS>=0&&DS.prevS>TL*.85&&s<TL*.15&&ds>0){
    if(!DS.started){DS.started=true;DS.lapStart=now;DS.lapNo=1;DS.cps=0;$("hLapBox").hidden=false;$("hLapNo").textContent="Davra 1";$("hBest").textContent="Rekord "+fmtT(DS.best);msg("Vaqt boshlandi!",1400);}
@@ -2317,6 +2420,7 @@ function tick(now){
    if(ds<-2&&sp>6)DS.wrongT=(DS.wrongT||0)+dt;else DS.wrongT=Math.max(0,(DS.wrongT||0)-dt*2);if(DS.wrongT>1.4){msg("Teskari yo‘nalish!",900);DS.wrongT=0;}}
   DS.prevS=s;}
  else{DS.prevS=-1;}
+ raceTick(now,dt,S,sp);
  /* kamera: mashina ortida; barmoq bilan surilsa atrofga/tepaga/pastga qaraydi, qo‘yib yuborilsa asta qaytadi */
  if(!DS.looking&&(DS.lookYaw||DS.lookPitch)&&now-DS.lookT>3500){var rk=Math.exp(-dt*3.2);DS.lookYaw*=rk;DS.lookPitch*=rk;if(Math.abs(DS.lookYaw)<.003&&Math.abs(DS.lookPitch)<.003)DS.lookYaw=DS.lookPitch=0;}
  S.camH+=wrapA(S.h-S.camH)*Math.min(1,dt*(3.6+sp*.02));
@@ -2325,7 +2429,7 @@ function tick(now){
  if(onPL&&DS.lookPitch<0){var lean=Math.min(45,-DS.lookPitch*60),la=S.camH+DS.lookYaw;cam[0]+=Math.sin(la)*lean;cam[2]+=Math.cos(la)*lean;}
  var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012+lift,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
  DS.shake*=Math.pow(.02,dt);if(DS.shake>.02){cam[0]+=(Math.random()-.5)*DS.shake*.5;cam[1]+=(Math.random()-.5)*DS.shake*.5;}
- var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045);
+ var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045)+(turbo?.1:0);
  DS.fov=fov;
  if(DS.lookPitch||DS.lookYaw){var bx=tgt[0]-cam[0],by=tgt[1]-cam[1],bz=tgt[2]-cam[2],hl=Math.hypot(bx,bz)||1,L3=Math.hypot(hl,by),an=Math.atan2(by,hl)+DS.lookPitch,a0=Math.atan2(bx,bz)+DS.lookYaw;an=Math.max(-1.45,Math.min(1.45,an));tgt=[cam[0]+Math.sin(a0)*Math.cos(an)*L3,cam[1]+Math.sin(an)*L3,cam[2]+Math.cos(a0)*Math.cos(an)*L3];}
  var dmn=Math.hypot(S.x-WLD.MC.x,S.z-WLD.MC.z),ek=Math.max(0,Math.min(1,(430-dmn)/250));ek=ek*ek*(3-2*ek);DS.ek=ek;
@@ -2335,8 +2439,9 @@ function tick(now){
   if(!onRoad&&Math.random()<dt*32){var d2=(Math.random()<.5?-1:1)*.9;WLD.puff(bx+rx*d2,S.y+.3,bz+rz*d2,-S.vx*.12+(Math.random()-.5)*2,1.2,-S.vz*.12+(Math.random()-.5)*2,1.1,1.8,[.62,.54,.4],.6);}
   if(onRoad&&Math.abs(vl)>3.4&&Math.random()<dt*48){var d3=(Math.random()<.5?-1:1)*.9;WLD.puff(bx+rx*d3,S.y+.25,bz+rz*d3,(Math.random()-.5),.8,(Math.random()-.5),1.0,1.5,[.92,.92,.95],.55);}
  }
+ if(turbo&&sp>3&&Math.random()<dt*45){WLD.puff(S.x-fx*2.5,S.y+.45,S.z-fz*2.5,-S.vx*.04,.4,-S.vz*.04,.45,.5,[1,.55,.15],.75);}
  drawCar(sp,vl);drawFx(sp);drawHud(vf);
- if(DS.eng&&DS.au){var t=DS.au.currentTime,rp=Math.min(1,sp/cfg.v);var still=sp<.8&&!gas;DS.eng.frequency.setTargetAtTime(60+rp*170+(gas?14:0),t,.08);DS.engG.gain.setTargetAtTime(still?0:(.014+.034*rp+(gas?.014:0)),t,still?.12:.08);
+ if(DS.eng&&DS.au){var t=DS.au.currentTime,rp=Math.min(1.5,sp/cfg.v);var still=sp<.8&&!gas;DS.eng.frequency.setTargetAtTime(60+rp*170+(gas?14:0),t,.08);DS.engG.gain.setTargetAtTime(still?0:(.014+.034*rp+(gas?.014:0)),t,still?.12:.08);
   DS.sqG.gain.setTargetAtTime(onRoad&&Math.abs(vl)>4.2?Math.min(.035,(Math.abs(vl)-4)*.01):0,t,.05);DS.windG.gain.setTargetAtTime(sp<1.5?0:Math.min(.09,sp*.0013),t,.15);}
 }
 function drawCar(sp,vl){
@@ -2359,14 +2464,16 @@ function drawFx(sp){
 function drawHud(vf){
  $("hKmh").textContent=Math.round(Math.abs(vf)*3.6);
  var S=DS.S,m=DS.mini;
- if(m){var c=$("hMap").getContext("2d");c.clearRect(0,0,120,120);c.drawImage(m.c,0,0);var px=m.ox-S.x*m.sc,pz=m.oz-S.z*m.sc;c.save();c.translate(px,pz);c.rotate(-S.h);c.fillStyle="#ffd27a";c.strokeStyle="#2a1a45";c.lineWidth=1.5;c.beginPath();c.moveTo(0,-6);c.lineTo(4.5,5);c.lineTo(-4.5,5);c.closePath();c.fill();c.stroke();c.restore();}
- if(DS.started)$("hLap").textContent=fmtT(performance.now()-DS.lapStart);
- if(DS.msgT>0){DS.msgT-=16.7;if(DS.msgT<=0)$("hMsg").hidden=true;}
+ if(m){var c=$("hMap").getContext("2d");c.clearRect(0,0,120,120);c.drawImage(m.c,0,0);var px=m.ox-S.x*m.sc,pz=m.oz-S.z*m.sc;c.save();c.translate(px,pz);c.rotate(-S.h);c.fillStyle="#ffd27a";c.strokeStyle="#2a1a45";c.lineWidth=1.5;c.beginPath();c.moveTo(0,-6);c.lineTo(4.5,5);c.lineTo(-4.5,5);c.closePath();c.fill();c.stroke();c.restore();if(DS.aiPos&&WLD.cars.length){var ax=m.ox-DS.aiPos.x*m.sc,az=m.oz-DS.aiPos.z*m.sc;c.fillStyle="#ff8a1f";c.strokeStyle="#2a1a45";c.lineWidth=1.2;c.beginPath();c.arc(ax,az,3.4,0,6.2832);c.fill();c.stroke();}}
+ if(DS.started&&(!DS.rc||DS.rc.phase==="idle"))$("hLap").textContent=fmtT(performance.now()-DS.lapStart);
+ if(DS.msgT>0){DS.msgT-=(DS.dtMs||16.7);if(DS.msgT<=0)$("hMsg").hidden=true;}
 }
 function drvInit(){
  function hold(id,fn,un){var b=$(id);b.addEventListener("pointerdown",function(e){e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(x){}b.classList.add("on");fn();});function u(){b.classList.remove("on");un();}b.addEventListener("pointerup",u);b.addEventListener("pointercancel",u);b.addEventListener("lostpointercapture",u);}
  hold("stL",function(){DS.steerT=-1;},function(){if(DS.steerT<0)DS.steerT=0;});hold("stR",function(){DS.steerT=1;},function(){if(DS.steerT>0)DS.steerT=0;});
- hold("pdGas",function(){DS.gas=true;},function(){DS.gas=false;});hold("pdBrk",function(){DS.brake=true;},function(){DS.brake=false;});
+ hold("pdGas",function(){DS.gas=true;},function(){DS.gas=false;});
+ hold("pdTurbo",function(){DS.turbo=true;},function(){DS.turbo=false;});
+ $("hRace").onclick=function(){if(DS.on&&DS.rc&&DS.rc.phase==="idle")startRace();};hold("pdBrk",function(){DS.brake=true;},function(){DS.brake=false;});
  var lk=null,lastTap=0;
  $("drv").addEventListener("pointerdown",function(e){if(!DS.on)return;if(e.target.closest&&e.target.closest("button"))return;if(lk)return;lk={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t0:performance.now(),moved:0};DS.looking=true;DS.lookT=performance.now();});
  window.addEventListener("pointermove",function(e){if(!lk||e.pointerId!==lk.id||!DS.on)return;var dx=e.clientX-lk.x,dy=e.clientY-lk.y;lk.x=e.clientX;lk.y=e.clientY;lk.moved+=Math.abs(dx)+Math.abs(dy);
@@ -2378,12 +2485,13 @@ function drvInit(){
  window.addEventListener("pointerup",lkEnd);window.addEventListener("pointercancel",lkEnd);
  $("hExit").onclick=stopDrive;
  $("hReset").onclick=function(){if(!DS.on)return;var S=DS.S,t=WLD.nearRoad(S.x,S.z);if(t.r>=0){var p=WLD.ROADS[t.r].smp[t.i];S.x=p.x;S.z=p.z;S.h=Math.atan2(p.tx,p.tz);S.camH=S.h;S.vx=S.vz=0;S.y=p.y;DS.steer=DS.steerT=0;msg("Yo‘lga qaytarildi",1200);}};
- var KM={ArrowLeft:"l",ArrowRight:"r",ArrowUp:"u",ArrowDown:"d",a:"l",d:"r",w:"u",s:"d",A:"l",D:"r",W:"u",S:"d"};
+ var KM={Shift:"t",t:"t",T:"t",ArrowLeft:"l",ArrowRight:"r",ArrowUp:"u",ArrowDown:"d",a:"l",d:"r",w:"u",s:"d",A:"l",D:"r",W:"u",S:"d"};
  window.addEventListener("keydown",function(e){if(!DS.on)return;var k=KM[e.key];if(k){DS.keys[k]=true;e.preventDefault();}else if(e.key==="h"||e.key==="H")honk();else if(e.key==="Escape")stopDrive();});
  window.addEventListener("keyup",function(e){var k=KM[e.key];if(k)DS.keys[k]=false;});
  window.addEventListener("resize",function(){if(DS.on)resize3d();});
  document.addEventListener("fullscreenchange",function(){if(DS.on&&!document.fullscreenElement&&!DS.leaving){/* foydalanuvchi to‘liq ekrandan chiqdi: o‘yin davom etadi */}});
  window.__drv=function(){return DS;};
+ window.__race=function(){if(!RL&&window.WLD)buildRL();return {RL:RL,LAPS:LAPS};};
 }
 drvInit();
 
