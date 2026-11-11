@@ -260,7 +260,7 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 <div class="modal" id="storyModal" hidden><div class="card storycard"><h3>Story uchun rasm</h3><img id="storyImg" alt="Story rasmi"><p class="sub">Rasmni bosib turib ham saqlashingiz mumkin. Story’ga qo’yganda havolani stiker qilib qo’shing.</p><div class="acts"><button class="btn" id="storyShare" hidden>Ulashish</button><a class="btn ghost dl" id="storyDl" href="#" download>Yuklab olish</a><button class="btn ghost" id="storyX">Yopish</button></div></div></div>
 <div class="modal" id="rmModal" hidden><div class="card"><h3>Mashinangiz o’chirildi</h3><p class="msg dark" id="rmText"></p><div id="rmIg"></div><div class="acts"><button class="btn" id="rmOk">Boshidan boshlash</button></div></div></div>
 <div id="drv" hidden>
- <canvas id="w3d"></canvas><canvas id="drvFx"></canvas><canvas id="drvCar" width="640" height="400"></canvas>
+ <canvas id="w3d"></canvas><canvas id="drvFx"></canvas><canvas id="drvCar" width="512" height="320"></canvas>
  <div class="hud-top">
   <div class="hud-l"><button class="hbtn" id="hExit">Chiqish</button><button class="hbtn" id="hReset">Qaytarish</button></div>
   <div class="hud-mid" id="hLapBox" hidden><small id="hLapNo"></small><b id="hLap"></b><small id="hBest"></small></div>
@@ -1655,7 +1655,7 @@ var WLD=(function(){
 
  /* ---------- cho‘qqi cho‘qqisidagi manzara maydonchasi: tosh platforma, ustunlar, to‘siqlar, sher haykali ---------- */
  function lion(mb,x,y,z){
-  var G=[.88,.68,.28],M=[.5,.3,.12],k=1.7;
+  var G=[.88,.68,.28],M=[.5,.3,.12],k=1.05;
   obox(mb,x,y+1.7*k,z,0,4.4*k,1.5*k,1.55*k,G,1,G);
   [[1.5,.5],[1.5,-.5],[-1.5,.5],[-1.5,-.5]].forEach(function(l){obox(mb,x+l[0]*k,y,z+l[1]*k,0,.55*k,.55*k,1.75*k,G,1,G);});
   obox(mb,x-2.4*k,y+2.6*k,z,0,1.6*k,1.2*k,1.2*k,G,1,G);obox(mb,x-3.0*k,y+2.9*k,z,0,.8*k,.9*k,.7*k,[.8,.6,.24],1,[.8,.6,.24]);
@@ -1669,11 +1669,11 @@ var WLD=(function(){
   /* tosh platforma (Sher shohi toshi kabi chiqib turgan) */
   var cx=(PL.x0+PL.x1)/2,L=PL.x1-PL.x0;obox(mb,cx,top-6,MC.z,0,L,26,6.12,SA,1,ST);
   /* tagidagi tosh ustun (qatlam-qatlam) */
-  var px=MC.x-118,gh=hgt(px,MC.z),hh=top-6-gh+2,segs=6,k;
-  for(k=0;k<segs;k++){var t0=k/segs,t1=(k+1)/segs;frus(mb,px,gh-1+hh*t0,MC.z,28-12*t0,28-12*t1,hh/segs+.6,7,k%2?SB:SA,1,false,k*.45);}
+  var px=PL.x0+30,gh=hgt(px,MC.z),hh=top-6-gh+2,segs=6,k;
+  for(k=0;k<segs;k++){var t0=k/segs,t1=(k+1)/segs;frus(mb,px,gh-1+hh*t0,MC.z,22-11*t0,22-11*t1,hh/segs+.6,7,k%2?SB:SA,1,false,k*.45);}
   var px2=MC.x-80,gh2=hgt(px2,MC.z+4);frus(mb,px2,gh2-1,MC.z+4,17,12,top-6-gh2+1,7,SB,1,false,.3);
   /* devor-to‘siq: tepa maydon chekkasi (shahar ko‘ruvchi yo‘l kirishi va platforma bundan mustasno) */
-  function wall(x,z,yaw,len){obox(mb,x,top,z,yaw,len,1.2,1.35,[.64,.57,.46],1,[.72,.66,.55]);addC(x+Math.cos(yaw)*len*.25,z+Math.sin(yaw)*len*.25,1.1);addC(x-Math.cos(yaw)*len*.25,z-Math.sin(yaw)*len*.25,1.1);}
+  function wall(x,z,yaw,len){var c0=Math.cos(yaw),s0=Math.sin(yaw);obox(mb,x,top,z,yaw,len,.9,.42,[.64,.57,.46],1,[.72,.66,.55]);obox(mb,x+c0*len/2,top+.42,z+s0*len/2,yaw,.13,.13,.8,[.22,.22,.25],1,[.3,.3,.32]);obox(mb,x,top+.86,z,yaw,len,.09,.09,[.85,.85,.88],1,[.9,.9,.92]);obox(mb,x,top+1.18,z,yaw,len,.1,.1,[.85,.85,.88],1,[.9,.9,.92]);addC(x+Math.cos(yaw)*len*.25,z+Math.sin(yaw)*len*.25,1.1);addC(x-Math.cos(yaw)*len*.25,z-Math.sin(yaw)*len*.25,1.1);}
   for(var a=0;a<360;a+=4){var ar=a*Math.PI/180,wx=MC.x+Math.cos(ar)*76.5,wz=MC.z+Math.sin(ar)*76.5;
    if(Math.abs(wrapPI(ar))<.34)continue;                     /* kirish (sharq) */
    if(wx<MC.x&&Math.abs(wz-MC.z)<15.5)continue;               /* platforma burchagi */
@@ -1682,7 +1682,7 @@ var WLD=(function(){
   for(var wxx=PL.x0+1;wxx<PL.x1-2;wxx+=5){wall(wxx+2.5,PL.z0+.6,0,5);wall(wxx+2.5,PL.z1-.6,0,5);}
   for(var wzz=PL.z0+3;wzz<PL.z1-2;wzz+=5)wall(PL.x0+.6,wzz+2.5,1.5708,5);
   /* sher haykali va poydevor */
-  obox(mb,MC.x-118,top+.12,MC.z,0,9,5.5,2.6,SA,1,ST);lion(mb,MC.x-118,top+.12+2.6,MC.z);addC(MC.x-118,MC.z,5);
+  obox(mb,MC.x-122,top+.12,MC.z+8.5,0,6,3.4,1.2,SA,1,ST);lion(mb,MC.x-122,top+.12+1.2,MC.z+8.5);addC(MC.x-122,MC.z+8.5,3.4);
   /* tog‘ yonbag‘ridagi toshlar */
   rs=5150;for(var q=0;q<90;q++){var ang=rnd()*6.2832,dd=95+rnd()*190,rx=MC.x+Math.cos(ang)*dd,rz=MC.z+Math.sin(ang)*dd,t=nearRoad(rx,rz);if(t.r>=0&&t.d<t.half+10)continue;rockMesh(CM(rx,rz).mb,rx,hgt(rx,rz),rz,1.6+rnd()*3.2,rnd());}
   LANDMARKS.push({name:"Sher cho‘qqisi",x:MC.x,z:MC.z});LANDMARKS.push({name:"Manzara maydonchasi: ko‘l va tog‘lar",x:MC.x-95,z:MC.z});
@@ -1800,7 +1800,7 @@ var WLD=(function(){
   function drawG(o){gl.bindBuffer(gl.ARRAY_BUFFER,o.pb);gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.nb);gl.enableVertexAttribArray(aN);gl.vertexAttribPointer(aN,4,gl.BYTE,true,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.cb);gl.enableVertexAttribArray(aC);gl.vertexAttribPointer(aC,4,gl.UNSIGNED_BYTE,true,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.ib);gl.drawElements(gl.TRIANGLES,o.n,gl.UNSIGNED_SHORT,0);}
   W.gm.forEach(drawG);W.farG.forEach(drawG);
   var fhl=Math.hypot(f[0],f[2])||1;gl.disable(gl.POLYGON_OFFSET_FILL);
-  [0,1].forEach(function(pass){if(pass===1){gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(-2,-8);}W.cl.forEach(function(c){if((c.cat==='r')!==(pass===1))return;var vis=c.cat==='n'?1000:(c.cat==='r'?1800:2300),dx=c.cx-cam[0],dz=c.cz-cam[2];if(dx*dx+dz*dz>=(vis+212)*(vis+212))return;if((dx*f[0]+dz*f[2])/fhl<-250)return;c.g.forEach(drawG);});});gl.disable(gl.POLYGON_OFFSET_FILL);
+  [0,1].forEach(function(pass){if(pass===1){gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(-2,-8);}W.cl.forEach(function(c){if((c.cat==='r')!==(pass===1))return;var vis=c.cat==='n'?(W.visN||1000):(c.cat==='r'?1800:2300),dx=c.cx-cam[0],dz=c.cz-cam[2];if(dx*dx+dz*dz>=(vis+212)*(vis+212))return;if((dx*f[0]+dz*f[2])/fhl<-250)return;c.g.forEach(drawG);});});gl.disable(gl.POLYGON_OFFSET_FILL);
   /* suv */
   p=W.pWt;gl.useProgram(p);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
   gl.uniformMatrix4fv(p.u.uVP,false,vp);gl.uniform3fv(p.u.uCam,cam);gl.uniform3fv(p.u.uSun,sun);gl.uniform3fv(p.u.uSunCol,e.sunCol);gl.uniform3fv(p.u.uZen,e.zen);gl.uniform3fv(p.u.uHor,e.hor);gl.uniform3fv(p.u.uWater,e.water);gl.uniform3fv(p.u.uFog,e.fog);gl.uniform2f(p.u.uFogD,e.fogS,e.fogL);gl.uniform1f(p.u.uTime,time);
@@ -2186,13 +2186,13 @@ function init(){
 init();
 /* ===== HAYDASH: alohida 3D dunyo. Butunlay brauzerda ishlaydi, serverga so‘rov yubormaydi.
    Boshqaruv: faqat ◀ ▶ tugmalari, GAZ va TORMOZ. Davra vaqti start chizig‘idan o‘tganda o‘zi boshlanadi. ===== */
-var DS={lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
+var DS={res:1,fAvg:16,qT:0,lookYaw:0,lookPitch:0,lookT:0,looking:false,hinted:false,on:false,car:null,item:-1,nick:"",S:null,cfg:null,steerT:0,steer:0,gas:false,brake:false,keys:{},au:null,eng:null,engG:null,sq:null,sqG:null,wind:null,windG:null,carSt:null,last:0,raf:0,msgT:0,shake:0,t:0,fxC:null,mini:null,best:0,lapStart:0,lapNo:0,cps:0,prevS:0,wrongT:0,started:false,ti:0,cf:0};
 function wrapA(a){while(a>Math.PI)a-=6.2832;while(a<-Math.PI)a+=6.2832;return a;}
 function fmtT(ms){if(!ms||ms<=0)return "–:––.–";var s=ms/1000,m=Math.floor(s/60);s-=m*60;return m+":"+(s<10?"0":"")+s.toFixed(1);}
 /* ---------- tovush ---------- */
 function auStart(){
  try{var A=window.AudioContext||window.webkitAudioContext;if(!A)return;DS.au=DS.au||new A();DS.au.resume();var au=DS.au;
-  if(!DS.eng){var o=au.createOscillator(),lp=au.createBiquadFilter(),g=au.createGain();o.type="sawtooth";lp.type="lowpass";lp.frequency.value=700;g.gain.value=0;o.connect(lp);lp.connect(g);g.connect(au.destination);o.start();DS.eng=o;DS.engG=g;
+  if(!DS.eng){var o=au.createOscillator(),lp=au.createBiquadFilter(),g=au.createGain();o.type="triangle";lp.type="lowpass";lp.frequency.value=480;g.gain.value=0;o.connect(lp);lp.connect(g);g.connect(au.destination);o.start();DS.eng=o;DS.engG=g;
    var o2=au.createOscillator(),g2=au.createGain(),bp=au.createBiquadFilter();o2.type="square";o2.frequency.value=950;bp.type="bandpass";bp.frequency.value=1100;g2.gain.value=0;o2.connect(bp);bp.connect(g2);g2.connect(au.destination);o2.start();DS.sq=o2;DS.sqG=g2;
    var len=au.sampleRate,buf=au.createBuffer(1,len,au.sampleRate),d=buf.getChannelData(0),b0=0;for(var i=0;i<len;i++){b0=.97*b0+.03*(Math.random()*2-1);d[i]=b0*6;}
    var ns=au.createBufferSource();ns.buffer=buf;ns.loop=true;var lp2=au.createBiquadFilter();lp2.type="lowpass";lp2.frequency.value=900;var g3=au.createGain();g3.gain.value=0;ns.connect(lp2);lp2.connect(g3);g3.connect(au.destination);ns.start();DS.wind=ns;DS.windG=g3;}}catch(e){}
@@ -2220,7 +2220,7 @@ function startDrive(i){
  setTimeout(beginWorld,120);
 }
 function resize3d(){
- var cv=$("w3d"),dpr=Math.min(window.devicePixelRatio||1,1.5),W=cv.clientWidth||window.innerWidth,H=cv.clientHeight||window.innerHeight;
+ var cv=$("w3d"),dpr=Math.min(window.devicePixelRatio||1,1.5,DS.res||1),W=cv.clientWidth||window.innerWidth,H=cv.clientHeight||window.innerHeight;
  var w=Math.max(2,Math.round(W*dpr)),h=Math.max(2,Math.round(H*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
  var fx=$("drvFx"),fw=Math.round(W/2),fh=Math.round(H/2);if(fx.width!==fw||fx.height!==fh){fx.width=fw;fx.height=fh;}
 }
@@ -2265,7 +2265,10 @@ function msg(t,ms){var m=$("hMsg");m.textContent=t;m.hidden=false;DS.msgT=ms||22
 /* ---------- har kadr ---------- */
 function tick(now){
  if(!DS.on)return;DS.raf=requestAnimationFrame(tick);
- var dt=Math.min(.05,(now-DS.last)/1000||.016);DS.last=now;DS.t+=dt;
+ var raw=now-DS.last,dt=Math.min(.05,raw/1000||.016);DS.last=now;DS.t+=dt;
+ if(raw>0&&raw<400){DS.fAvg=(DS.fAvg||16)*.94+raw*.06;if(now-(DS.qT||0)>2200){DS.qT=now;var mx=Math.min(window.devicePixelRatio||1,1.5);
+  if(DS.fAvg>30&&DS.res>.55){DS.res=Math.max(.7,DS.res-.15);}else if(DS.fAvg>30&&DS.res<=.71){WLD.visN=Math.max(600,(WLD.visN||1000)-150);}
+  else if(DS.fAvg<18){if((WLD.visN||1000)<1000)WLD.visN=Math.min(1000,(WLD.visN||1000)+100);else if(DS.res<mx)DS.res=Math.min(mx,DS.res+.1);}}}
  var S=DS.S,cfg=DS.cfg,T=WLD.track(),TL=WLD.trackLen();
  /* rul: tugma bosilganda sekin-asta buriladi (keskin emas) */
  var k=DS.keys,kt=(k.r?1:0)-(k.l?1:0),target=kt?kt:DS.steerT;
@@ -2318,7 +2321,9 @@ function tick(now){
  if(!DS.looking&&(DS.lookYaw||DS.lookPitch)&&now-DS.lookT>3500){var rk=Math.exp(-dt*3.2);DS.lookYaw*=rk;DS.lookPitch*=rk;if(Math.abs(DS.lookYaw)<.003&&Math.abs(DS.lookPitch)<.003)DS.lookYaw=DS.lookPitch=0;}
  S.camH+=wrapA(S.h-S.camH)*Math.min(1,dt*(3.6+sp*.02));
  var back=7.2+Math.min(3,sp*.045),cx=Math.sin(S.camH),cz=Math.cos(S.camH),cam=[S.x-cx*back,0,S.z-cz*back];
- var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
+ var onPL=S.x>WLD.PL.x0-30&&S.x<WLD.PL.x1+20&&Math.abs(S.z-WLD.MC.z)<70&&S.y>WLD.MTOP-3,lift=(DS.lookPitch<0?Math.min(10,-DS.lookPitch*12):0)+(onPL?3:0);
+ if(onPL&&DS.lookPitch<0){var lean=Math.min(45,-DS.lookPitch*60),la=S.camH+DS.lookYaw;cam[0]+=Math.sin(la)*lean;cam[2]+=Math.cos(la)*lean;}
+ var ch=WLD.heightAt(cam[0],cam[2]),wantY=Math.max(S.y+2.7+sp*.012+lift,ch+1.5);S.camY+=(wantY-S.camY)*Math.min(1,dt*5);cam[1]=S.camY;
  DS.shake*=Math.pow(.02,dt);if(DS.shake>.02){cam[0]+=(Math.random()-.5)*DS.shake*.5;cam[1]+=(Math.random()-.5)*DS.shake*.5;}
  var tgt=[S.x+cx*10,S.y+1.2,S.z+cz*10],fov=1.0+Math.min(.3,sp*.0045);
  DS.fov=fov;
@@ -2331,18 +2336,18 @@ function tick(now){
   if(onRoad&&Math.abs(vl)>3.4&&Math.random()<dt*48){var d3=(Math.random()<.5?-1:1)*.9;WLD.puff(bx+rx*d3,S.y+.25,bz+rz*d3,(Math.random()-.5),.8,(Math.random()-.5),1.0,1.5,[.92,.92,.95],.55);}
  }
  drawCar(sp,vl);drawFx(sp);drawHud(vf);
- if(DS.eng&&DS.au){var t=DS.au.currentTime,rp=Math.min(1,sp/cfg.v);DS.eng.frequency.setTargetAtTime(48+rp*190+(gas?16:0),t,.06);DS.engG.gain.setTargetAtTime(.022+.04*rp+(gas?.02:0),t,.08);
-  DS.sqG.gain.setTargetAtTime(onRoad&&Math.abs(vl)>4.2?Math.min(.035,(Math.abs(vl)-4)*.01):0,t,.05);DS.windG.gain.setTargetAtTime(Math.min(.12,sp*.0021),t,.1);}
+ if(DS.eng&&DS.au){var t=DS.au.currentTime,rp=Math.min(1,sp/cfg.v);var still=sp<.8&&!gas;DS.eng.frequency.setTargetAtTime(60+rp*170+(gas?14:0),t,.08);DS.engG.gain.setTargetAtTime(still?0:(.014+.034*rp+(gas?.014:0)),t,still?.12:.08);
+  DS.sqG.gain.setTargetAtTime(onRoad&&Math.abs(vl)>4.2?Math.min(.035,(Math.abs(vl)-4)*.01):0,t,.05);DS.windG.gain.setTargetAtTime(sp<1.5?0:Math.min(.09,sp*.0013),t,.15);}
 }
 function drawCar(sp,vl){
  var S=DS.S,car=DS.car,W=window.innerWidth,H=window.innerHeight,land=W>H,cw=Math.min(W*(land?.46:.7),H*(land?.84:.62)),ch=cw/1.6;
  var el=$("drvCar");el.style.width=cw+"px";el.style.height=ch+"px";el.style.left=(W/2-cw/2+DS.steer*W*.012)+"px";el.style.top=(H*(land?.78:.64)-ch*.62)+"px";
  var dl=wrapA(S.h-S.camH),az=Math.atan2(-Math.cos(dl),-Math.sin(dl));
  DS.cf++;
- if(DS.cf%2===0||Math.abs(dl)>.02||DS.cf<3){try{c3Render(DS.carSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:az,el:.3,seed:3,zoom:1.75,noFetch:true});}catch(e){}}
+ if(DS.cf%3===0||(Math.abs(dl)>.05&&DS.cf%2===0)||DS.cf<3){try{c3Render(DS.carSt,car.b,car.m,{color:COLORS[car.c][1],finish:car.f,rim:RIMS[car.r||0][1],az:az,el:.3,seed:3,zoom:1.75,noFetch:true});}catch(e){}}
  var roll=-(DS.steer*Math.min(1,sp/30))*3.2-Math.max(-2,Math.min(2,vl*.2)),bump=Math.sin(DS.t*38)*Math.min(1.6,sp*.02);
  var tv=Math.tan((DS.fov||1)/2),th=tv*(W/H),lyw=DS.lookYaw,lpt=DS.lookPitch,ox=0,oy=0,vis=1;
- if(lyw||lpt){if(Math.abs(lyw)>1.3){vis=0;}else ox=Math.tan(lyw)/th*(W/2);oy=Math.tan(lpt)/tv*(H/2);if(Math.abs(lpt)>1.05)vis=0;}
+ if(lyw||lpt){if(Math.abs(lyw)>1.3){vis=0;}else ox=Math.tan(lyw)/th*(W/2);oy=Math.tan(lpt)/tv*(H/2);if(Math.abs(lpt)>1.05)vis=0;if(lpt<-.2)vis=Math.max(0,1-(-lpt-.2)/.2);}
  el.style.transform="translate("+ox.toFixed(1)+"px,"+(oy+bump).toFixed(1)+"px) rotate("+roll+"deg)";el.style.opacity=String(vis);
 }
 function drawFx(sp){
