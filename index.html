@@ -235,7 +235,7 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
   <div class="brandbar"><b>Obunachilar garaji</b><small id="count">Yuklanmoqda…</small></div>
   <div class="row"><input id="nickIn" type="text" placeholder="@nikingni yozib mashinangni top" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="31" aria-label="Instagram nik"><button class="btn" id="goBtn">Topish</button></div>
   <div class="demo" id="demo" hidden>Namuna rejim: ma’lumotlar faqat shu telefonda saqlanadi.</div>
-  <button class="featbtn" id="featBtn" hidden>★ Kun mashinasi: <b id="featNick"></b></button>
+  <button class="featbtn" id="featBtn" hidden>💎 Chempion: <b id="featNick"></b></button>
   <div class="demo" id="offline" hidden>Server bilan aloqa yo’q. Biroz kutib, <a href="" style="color:inherit">qayta yuklang</a>.</div>
  </div>
  <div id="lotMsg" class="lotmsg"></div>
@@ -1981,6 +1981,20 @@ var PLATS={},LVN=["Oddiy","Kumush","Oltin"],PLC=[["#6b5596","#3a2a60","#ffd27a",
  c.strokeStyle=P[2];c.lineWidth=lv?5:3.5;c.beginPath();c.ellipse(cx,cy,rx-2,ry-1.5,0,0,6.2832);c.stroke();if(lv===2){c.fillStyle="rgba(255,255,255,.9)";[[60,30],[190,36],[128,16],[95,52],[165,58]].forEach(function(q){c.beginPath();c.arc(q[0],q[1],2.2,0,6.2832);c.fill();});}
  c.strokeStyle="rgba(255,255,255,.35)";c.lineWidth=1.2;c.beginPath();c.ellipse(cx,cy,rx-9,ry-7,0,Math.PI*1.05,Math.PI*1.95);c.stroke();
  return PLATS[lv]=cv;}
+/* OLMOS podium (chempion uchun): qirrali kristall, oq-havorang yaltirash */
+var PLATD=null;function platD(){if(PLATD)return PLATD;var cv=document.createElement("canvas");cv.width=320;cv.height=150;var c=cv.getContext("2d"),cx=160,cy=56,rx=150,ry=40,i;
+ var sg=c.createRadialGradient(cx,cy+40,10,cx,cy+40,160);sg.addColorStop(0,"rgba(80,200,255,.35)");sg.addColorStop(1,"rgba(80,200,255,0)");c.fillStyle=sg;c.fillRect(0,0,320,150);
+ var N=16;for(i=0;i<N;i++){var a1=i/N*Math.PI*2,a2=(i+1)/N*Math.PI*2;if(Math.sin((a1+a2)/2)<0)continue;var x1=cx+Math.cos(a1)*rx,y1=cy+Math.sin(a1)*ry,x2=cx+Math.cos(a2)*rx,y2=cy+Math.sin(a2)*ry;
+  var g=c.createLinearGradient(x1,y1,x2,y2+30);var k=i%3;g.addColorStop(0,["#bff3ff","#6fd0ff","#e9fcff"][k]);g.addColorStop(1,["#3c8fd6","#8a7dff","#58b8f0"][k]);c.fillStyle=g;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.lineTo(cx+Math.cos(a2)*rx*.82,y2+30);c.lineTo(cx+Math.cos(a1)*rx*.82,y1+30);c.closePath();c.fill();c.strokeStyle="rgba(255,255,255,.55)";c.lineWidth=1;c.stroke();}
+ var tg=c.createLinearGradient(0,cy-ry,0,cy+ry);tg.addColorStop(0,"#f4feff");tg.addColorStop(.5,"#a6e9ff");tg.addColorStop(1,"#5aaee8");c.fillStyle=tg;c.beginPath();c.ellipse(cx,cy,rx,ry,0,0,6.2832);c.fill();
+ c.strokeStyle="rgba(255,255,255,.75)";c.lineWidth=1.2;for(i=0;i<12;i++){var a=i/12*Math.PI*2;c.beginPath();c.moveTo(cx+Math.cos(a)*rx*.38,cy+Math.sin(a)*ry*.38);c.lineTo(cx+Math.cos(a)*rx,cy+Math.sin(a)*ry);c.stroke();}
+ c.beginPath();c.ellipse(cx,cy,rx*.38,ry*.38,0,0,6.2832);c.fillStyle="rgba(255,255,255,.55)";c.fill();c.stroke();
+ for(i=0;i<12;i++){var b1=i/12*Math.PI*2,b2=(i+.5)/12*Math.PI*2;c.fillStyle=i%2?"rgba(120,200,255,.35)":"rgba(255,255,255,.35)";c.beginPath();c.moveTo(cx+Math.cos(b1)*rx*.38,cy+Math.sin(b1)*ry*.38);c.lineTo(cx+Math.cos(b2)*rx,cy+Math.sin(b2)*ry);c.lineTo(cx+Math.cos(b1+Math.PI/6)*rx*.38,cy+Math.sin(b1+Math.PI/6)*ry*.38);c.closePath();c.fill();}
+ c.strokeStyle="#ffffff";c.lineWidth=3.5;c.beginPath();c.ellipse(cx,cy,rx-2,ry-1.5,0,0,6.2832);c.stroke();c.strokeStyle="rgba(110,200,255,.9)";c.lineWidth=1.5;c.beginPath();c.ellipse(cx,cy,rx+3,ry+2.5,0,0,6.2832);c.stroke();
+ return PLATD=cv;}
+/* yaltirab turgan yulduzchalar (vaqtga qarab miltillaydi) */
+function sparkles(c,x,y,w,h,tw){for(var i=0;i<9;i++){var ph=(tw+i*.37)%1,a=Math.sin(ph*Math.PI);if(a<.15)continue;var sx=x+Math.sin(i*12.9898)*w,sy=y+Math.cos(i*7.233)*h*.6,s=(3+(i%3)*2.2)*a;c.save();c.globalAlpha=a*.95;c.fillStyle="#ffffff";c.beginPath();c.moveTo(sx,sy-s*2);c.lineTo(sx+s*.45,sy-s*.45);c.lineTo(sx+s*2,sy);c.lineTo(sx+s*.45,sy+s*.45);c.lineTo(sx,sy+s*2);c.lineTo(sx-s*.45,sy+s*.45);c.lineTo(sx-s*2,sy);c.lineTo(sx-s*.45,sy-s*.45);c.closePath();c.fill();c.restore();}}
+var BEAMD=null;function beamD(){if(BEAMD)return BEAMD;var cv=document.createElement("canvas");cv.width=128;cv.height=256;var c=cv.getContext("2d");var g=c.createLinearGradient(0,0,0,256);g.addColorStop(0,"rgba(170,235,255,0)");g.addColorStop(.35,"rgba(170,235,255,.13)");g.addColorStop(1,"rgba(200,245,255,.3)");c.fillStyle=g;c.beginPath();c.moveTo(52,0);c.lineTo(76,0);c.lineTo(128,256);c.lineTo(0,256);c.closePath();c.fill();return BEAMD=cv;}
 var BEAM=null;function beam(){if(BEAM)return BEAM;var cv=document.createElement("canvas");cv.width=128;cv.height=256;var c=cv.getContext("2d");var g=c.createLinearGradient(0,0,0,256);g.addColorStop(0,"rgba(255,236,190,0)");g.addColorStop(.35,"rgba(255,236,190,.10)");g.addColorStop(1,"rgba(255,236,190,.22)");c.fillStyle=g;c.beginPath();c.moveTo(52,0);c.lineTo(76,0);c.lineTo(128,256);c.lineTo(0,256);c.closePath();c.fill();return BEAM=cv;}
 function lotFit(){var dpr=Math.min(2,window.devicePixelRatio||1),W=lotCv.clientWidth,H=lotCv.clientHeight;if(!W||!H)return false;if(lotCv.width!==Math.round(W*dpr)||lotCv.height!==Math.round(H*dpr)){lotCv.width=Math.round(W*dpr);lotCv.height=Math.round(H*dpr);}lotC.setTransform(dpr,0,0,dpr,0,0);LOT.VW=W;LOT.VH=H;return true;}
 function lotDraw(now){
@@ -2013,18 +2027,18 @@ function lotDraw(now){
   }
   rowLab.forEach(drawLabel);rowLab=[];
  }
- /* KUN MASHINASI: alohida katta sahna (turargoh oldida) */
+ /* CHEMPION: olmos podiumli alohida katta sahna (turargoh oldida) */
  if(LOT.feat&&LOT.feat.p<LOT.n){var fc=carOf(LOT.feat.p);if(!fc&&!LOT.chunks[Math.floor(LOT.feat.p/LOT.chunk)])loadChunk(Math.floor(LOT.feat.p/LOT.chunk));
   var SY=-CH*1.9,SX=LOT.cols*CW/2,zs=(SY-cam.y)+cam.d*cosP,ds=hC*sinP+zs*cosP;
   if(fc&&ds>2.5){var ssc=f/ds,ssx=cx+(SX-cam.x)*ssc,ssy=cy-f*(-hC*cosP+zs*sinP)/ds,sw=CARW*ssc*2.1,shh=CARH*ssc*2.1;
    if(ssy-shh*2.2<H&&ssy>-40&&ssx>-sw&&ssx<W+sw){
-    c.globalAlpha=.95;c.drawImage(beam(),ssx-sw*.95,ssy-shh*2.3,sw*1.9,shh*2.25);c.drawImage(beam(),ssx-sw*1.25,ssy-shh*2.0,sw*.9,shh*2);c.drawImage(beam(),ssx+sw*.35,ssy-shh*2.0,sw*.9,shh*2);c.globalAlpha=1;
-    var spw=sw*1.35,sph=spw*110/256;c.drawImage(plat(2),ssx-spw/2,ssy-sph*.46+shh*.06,spw,sph);c.drawImage(plat(2),ssx-spw*.4,ssy-sph*.42,spw*.8,sph*.8);
+    c.globalAlpha=.95;c.drawImage(beamD(),ssx-sw*.95,ssy-shh*2.3,sw*1.9,shh*2.25);c.drawImage(beamD(),ssx-sw*1.25,ssy-shh*2.0,sw*.9,shh*2);c.drawImage(beamD(),ssx+sw*.35,ssy-shh*2.0,sw*.9,shh*2);c.globalAlpha=1;
+    var spw=sw*1.35,sph=spw*110/256;c.drawImage(platD(),ssx-spw*.56,ssy-sph*.5+shh*.06,spw*1.12,sph*1.12);c.drawImage(platD(),ssx-spw*.4,ssy-sph*.44,spw*.8,sph*.8);var tw=(Date.now()%2400)/2400;sparkles(c,ssx,ssy-shh*.2,sw*.7,shh*.9,tw);LOT.dirty=true;
     var hk2=code(fc);if(!LOT.hiF||LOT.hiF.k!==hk2){var g3=spriteGL(fc,true);if(g3){var hc2=document.createElement("canvas");hc2.width=380;hc2.height=212;hc2.getContext("2d").drawImage(g3,0,0);LOT.hiF={k:hk2,c:hc2};}}
     var fimg=LOT.hiF&&LOT.hiF.k===hk2?LOT.hiF.c:sprite(fc);if(fimg)c.drawImage(fimg,ssx-sw/2,ssy-shh*.86,sw,shh);
     var fs2=Math.max(12,Math.min(26,ssc*.9));c.font='400 '+fs2+'px "Lilita One","Nunito",system-ui,sans-serif';c.textAlign="center";c.textBaseline="middle";
-    var t1="★ KUN MASHINASI ★",t2="@"+LOT.feat.nick,w1=c.measureText(t1).width+fs2*1.6,y1=ssy-shh*1.05;
-    c.fillStyle="#ffd27a";c.strokeStyle="#2a1a45";c.lineWidth=3;c.beginPath();if(c.roundRect)c.roundRect(ssx-w1/2,y1-fs2*1.2,w1,fs2*1.7,fs2*.85);else c.rect(ssx-w1/2,y1-fs2*1.2,w1,fs2*1.7);c.fill();c.stroke();c.fillStyle="#2a1a45";c.fillText(t1,ssx,y1-fs2*.35);
+    var t1="💎 CHEMPION 💎",t2="@"+LOT.feat.nick,w1=c.measureText(t1).width+fs2*1.6,y1=ssy-shh*1.05;
+    var dg=c.createLinearGradient(0,y1-fs2*1.2,0,y1+fs2*.5);dg.addColorStop(0,"#f2fdff");dg.addColorStop(.55,"#9fe6ff");dg.addColorStop(1,"#5cc3f5");c.fillStyle=dg;c.strokeStyle="#2a1a45";c.lineWidth=3;c.beginPath();if(c.roundRect)c.roundRect(ssx-w1/2,y1-fs2*1.2,w1,fs2*1.7,fs2*.85);else c.rect(ssx-w1/2,y1-fs2*1.2,w1,fs2*1.7);c.fill();c.stroke();c.fillStyle="#2a1a45";c.fillText(t1,ssx,y1-fs2*.35);
     c.font='400 '+(fs2*.8)+'px "Lilita One","Nunito",system-ui,sans-serif';var w2=c.measureText(t2).width+fs2*1.2;c.fillStyle="#fff1d6";c.beginPath();if(c.roundRect)c.roundRect(ssx-w2/2,ssy+sph*.35,w2,fs2*1.3,fs2*.65);else c.rect(ssx-w2/2,ssy+sph*.35,w2,fs2*1.3);c.fill();c.stroke();c.fillStyle="#2a1a45";c.fillText(t2,ssx,ssy+sph*.35+fs2*.68);
     LOT.hit.push([ssx,ssy,sw,shh,LOT.feat.p]);}}}
  /* tanlangan mashina doim ustida */
@@ -2076,7 +2090,7 @@ function closeSel(){LOT.sel=-1;$("sel").hidden=true;LOT.dirty=true;}
 function updateSel(){
  var i=LOT.sel;if(i<0){$("sel").hidden=true;return;}
  var it=LOT.items[i],car=carOf(i),mine=me&&me.nick===it[0];
- $("sel").hidden=false;$("selNick").textContent="@"+it[0];$("selCar").textContent=carName(car);var isF=LOT.feat&&LOT.feat.p===i;$("selSub").textContent=(isF?"★ Kun mashinasi · ":"")+(it[3]===0?"Yangi · ":"")+((it[2]|0)>0?LVN[it[2]]+" podium · ":"")+COLORS[car.c][0]+(it[1]?"":" · tayinlangan");
+ $("sel").hidden=false;$("selNick").textContent="@"+it[0];$("selCar").textContent=carName(car);var isF=LOT.feat&&LOT.feat.p===i;$("selSub").textContent=(isF?"💎 Chempion · ":"")+(it[3]===0?"Yangi · ":"")+((it[2]|0)>0?LVN[it[2]]+" podium · ":"")+COLORS[car.c][0]+(it[1]?"":" · tayinlangan");
  var ec=$("selEmb"),c=ec.getContext("2d");c.clearRect(0,0,88,88);c.drawImage(emblemCanvas(car.b,88),0,0);
  $("selWarn").hidden=!(mine&&meUnverified());if(!$("selWarn").hidden)$("selWarn").innerHTML=warnHTML();
  $("selBtns").innerHTML=(mine?'<button class="btn" id="sbEdit">Mashinani o’zgartirish</button>':'<button class="btn" id="sbMine">Bu mening nikim</button>')+'<button class="btn ghost" id="sbView">3D ko’rish</button>'+(GLOK?'<button class="btn drivebtn" id="sbDrive">Haydash</button>':'')+'<div class="selrow2"><button class="btn small" id="sbLink">Havolani ulashish</button>'+(mine?'<button class="btn small" id="sbStory">Story uchun rasm</button>':'')+'</div>';
@@ -2126,7 +2140,7 @@ function makeStory(nick,car,lv,feat){
   c.textAlign="center";c.textBaseline="middle";
   c.font='400 92px "Lilita One",Arial Black,sans-serif';c.lineWidth=14;c.strokeStyle="#2a1a45";c.fillStyle="#fff1d6";c.strokeText("Obunachilar garaji",W/2,250);c.fillText("Obunachilar garaji",W/2,250);
   c.font='400 54px "Lilita One",Arial Black,sans-serif';c.fillStyle="#ffd27a";c.lineWidth=10;c.strokeText("1 obunachi = 1 mashina",W/2,345);c.fillText("1 obunachi = 1 mashina",W/2,345);
-  if(feat){c.font='400 50px "Lilita One",Arial Black,sans-serif';rrect(c,W/2-330,420,660,90,45);c.fillStyle="#ffd27a";c.fill();c.lineWidth=6;c.strokeStyle="#2a1a45";c.stroke();c.fillStyle="#2a1a45";c.fillText("★ Kun mashinasi",W/2,467);}
+  if(feat){c.font='400 50px "Lilita One",Arial Black,sans-serif';rrect(c,W/2-330,420,660,90,45);c.fillStyle="#ffd27a";c.fill();c.lineWidth=6;c.strokeStyle="#2a1a45";c.stroke();c.fillStyle="#2a1a45";c.fillText("💎 CHEMPION",W/2,467);}
   var pg=plat(lv);c.globalAlpha=.85;c.drawImage(beam(),W/2-470,560,940,700);c.globalAlpha=1;c.drawImage(pg,W/2-500,1060,1000,430);
   var im=storyCar(car);c.drawImage(im,W/2-470,735,940,526);
   var pn="@"+nick;c.font='400 70px "Lilita One",Arial Black,sans-serif';var tw=Math.min(760,c.measureText(pn).width);rrect(c,W/2-tw/2-110,1440,tw+220,120,24);c.fillStyle="#fff";c.fill();c.lineWidth=8;c.strokeStyle="#111";c.stroke();
@@ -2334,6 +2348,7 @@ function startRace(){
 }
 function endRace(text,ms){if(!DS.rc)return;DS.rc.phase="done";DS.rc.tEnd=performance.now();msg(text,ms||5000);}
 function raceTick(now,dt,S,sp){
+ if(DS.vidAI!==undefined){WLD.cars=DS.vidAI?[DS.vidAI]:[];DS.aiPos=DS.vidAI;return;}
  var nearZone=Math.hypot(S.x-WLD.RACE.x,S.z-WLD.RACE.z)<900;
  if(!nearZone&&(!DS.rc||DS.rc.phase==="idle")){if(WLD.cars.length)WLD.cars=[];$("hRace").hidden=true;return;}
  if(!RL)buildRL();
@@ -2375,9 +2390,9 @@ function turboUI(racing){var b=$("pdTurbo"),tb=DS.tb;if(!b)return;var off=racing
  b.textContent=racing?"—":(tb.lock>0?Math.ceil(tb.lock)+"s":"TURBO");}
 /* ---------- har kadr ---------- */
 function tick(now){
- if(!DS.on)return;DS.raf=requestAnimationFrame(tick);
+ if(!DS.on)return;if(!DS.manual)DS.raf=requestAnimationFrame(tick);
  var raw=now-DS.last,dt=Math.min(.05,raw/1000||.016);DS.dtMs=Math.min(100,raw||16.7);DS.last=now;DS.t+=dt;
- if(raw>0&&raw<400){DS.fAvg=(DS.fAvg||16)*.94+raw*.06;if(now-(DS.qT||0)>2200){DS.qT=now;var mx=Math.min(window.devicePixelRatio||1,1.5);
+ if(!DS.manual&&raw>0&&raw<400){DS.fAvg=(DS.fAvg||16)*.94+raw*.06;if(now-(DS.qT||0)>2200){DS.qT=now;var mx=Math.min(window.devicePixelRatio||1,1.5);
   if(DS.fAvg>30&&DS.res>.55){DS.res=Math.max(.7,DS.res-.15);}else if(DS.fAvg>30&&DS.res<=.71){WLD.visN=Math.max(600,(WLD.visN||1000)-150);}
   else if(DS.fAvg<18){if((WLD.visN||1000)<1000)WLD.visN=Math.min(1000,(WLD.visN||1000)+100);else if(DS.res<mx)DS.res=Math.min(mx,DS.res+.1);}}}
  var S=DS.S,cfg=DS.cfg,T=WLD.track(),TL=WLD.trackLen();
@@ -2502,7 +2517,7 @@ function drvInit(){
  window.addEventListener("keyup",function(e){var k=KM[e.key];if(k)DS.keys[k]=false;});
  window.addEventListener("resize",function(){if(DS.on)resize3d();});
  document.addEventListener("fullscreenchange",function(){if(DS.on&&!document.fullscreenElement&&!DS.leaving){/* foydalanuvchi to‘liq ekrandan chiqdi: o‘yin davom etadi */}});
- window.__drv=function(){return DS;};
+ window.__drv=function(){return DS;};window.__tick=function(t){tick(t);};
  window.__race=function(){if(!RL&&window.WLD)buildRL();return {RL:RL,LAPS:LAPS};};
 }
 drvInit();

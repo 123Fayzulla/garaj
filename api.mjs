@@ -159,8 +159,9 @@ function makeApi(store, env = {}) {
   }
   async function lotMeta() {
     const c = await config(), f = (await store.meta.get("featured"))?.data || null;
-    const pick = f && f.nick && f.day === dayNo() ? f : await daily();
-    return { n: c.next || 0, chunk: CHUNK, ig: c.ig || "", featured: pick && pick.nick ? { nick: pick.nick, p: pick.p } : null };
+    let pick = null;                                  // CHEMPION: admin belgilaydi, ro‘yxat yangilansa ham o‘zgarmaydi
+    if (f && f.nick) { const r = await store.users.get(f.nick); if (r && r.data && r.data.p != null && r.data.p < (c.next || 0)) pick = { nick: f.nick, p: r.data.p }; }
+    return { n: c.next || 0, chunk: CHUNK, ig: c.ig || "", featured: pick };
   }
   async function lotChunk(k) { k = Math.max(0, k | 0); return { k, items: (await chunkData(k, true)).map((e) => e && [e[0], e[1], e[3] || 0, e[4] === 0 ? 0 : 1]) }; }
   async function allChunks(fnEach) {
@@ -271,7 +272,7 @@ function makeApi(store, env = {}) {
       for (let c = 0; c < newK; c++) { const arr = E.slice(c * CHUNK, (c + 1) * CHUNK).map(([, e]) => e); while (arr.length < CHUNK) arr.push(null); await store.lot.put("c" + c, arr, {}); }
       for (let c = newK; c < K; c++) await store.lot.del("c" + c);
       await cas(store.meta, "config", (c) => { c.next = m; return c; }, () => ({}));
-      for (const key of ["daily", "featured"]) {      // kun mashinasining joyi ham yangilanadi
+      for (const key of ["daily", "featured"]) {      // chempionning joyi ham yangilanadi
         const d = (await store.meta.get(key))?.data;
         if (d && d.nick) { const r = await store.users.get(d.nick); if (r && r.data.p != null) await store.meta.put(key, { ...d, p: r.data.p }, {}); else await store.meta.del(key); }
       }
@@ -317,7 +318,7 @@ function makeApi(store, env = {}) {
       if (!body.nick) { await store.meta.put("featured", {}, {}); return { ok: true, featured: null }; }
       const nick = normNick(body.nick); if (!nick) throw new HttpError(400, "Nik noto’g’ri");
       const rec = await store.users.get(nick); if (!rec || rec.data.p == null) throw new HttpError(404, "Bu nik turargohda yo’q");
-      await store.meta.put("featured", { nick, p: rec.data.p, t: now(), day: dayNo() }, {});
+      await store.meta.put("featured", { nick, p: rec.data.p, t: now() }, {});
       return { ok: true, featured: { nick, p: rec.data.p } };
     }
     if (body.action === "stats") return { ...(await computeStats()), config: await config() };

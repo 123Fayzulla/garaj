@@ -65,7 +65,7 @@ hr{border:0;border-top:1px solid #5b4684;margin:14px 0}a{color:#ffd27a}
     <select id="lL" style="margin-top:8px"><option value="0">Oddiy podium</option><option value="1">Kumush podium</option><option value="2">Oltin podium</option></select>
     <button id="lB">Podiumni berish</button>
     <hr>
-    <label for="fN">Bugungi kun mashinasi (bo‘sh = avtomatik)</label>
+    <label for="fN">💎 Chempion niki (bo‘sh = chempionni olib tashlash). Ro‘yxat yangilansa ham o‘zgarmaydi</label>
     <input id="fN" type="text" placeholder="nik" autocapitalize="off">
     <button id="fB">Belgilash</button>
     <hr>
@@ -147,7 +147,7 @@ $('wp').onclick=async()=>{
 $('igB').onclick=async()=>{busy(true);try{await call({action:'settings',ig:$('igN').value});say('✓ Saqlandi: @'+$('igN').value.replace(/^@/,''))}catch(e){say(e.message,'bad')}finally{busy(false)}};
 $('rB').onclick=async()=>{busy(true);try{await call({action:'reset',nick:$('rN').value});say('✓ @'+$('rN').value.replace(/^@/,'')+' uchun PIN o‘chirildi. U yangi PIN o‘rnata oladi, mashinasi saqlanib qoladi.')}catch(e){say(e.message,'bad')}finally{busy(false)}};
 $('lB').onclick=async()=>{busy(true);try{await call({action:'level',nick:$('lN').value,level:+$('lL').value});say('✓ Podium berildi')}catch(e){say(e.message,'bad')}finally{busy(false)}};
-$('fB').onclick=async()=>{busy(true);try{const n=$('fN').value.trim();const j=await call({action:'featured',nick:n||undefined});say(n?'✓ Bugungi kun mashinasi: @'+n.replace(/^@/,''):'✓ Endi kun mashinasi avtomatik tanlanadi')}catch(e){say(e.message,'bad')}finally{busy(false)}};
+$('fB').onclick=async()=>{busy(true);try{const n=$('fN').value.trim();const j=await call({action:'featured',nick:n||undefined});say(n?'✓ Chempion: @'+n.replace(/^@/,''):'✓ Chempion olib tashlandi')}catch(e){say(e.message,'bad')}finally{busy(false)}};
 $('stt').onclick=async()=>{busy(true);try{const j=await call({action:'selftest'});const n={create:'Yozuv yaratish',secondCreateBlocked:'Ikkinchi marta yaratishni to‘sish',read:'O‘qish',matchWrite:'Mos yozish',staleWriteBlocked:'Eskirgan yozishni to‘sish',readAfterWrite:'Yozgandan keyin darhol o‘qish',list:'Ro‘yxat olish',delete:'O‘chirish'};say((j.ok?'✓ Hammasi to‘g‘ri ishlayapti':'✗ Muammo bor')+'\n'+Object.keys(n).map(k=>(j.checks[k]===true?'✓ ':'✗ ')+n[k]).join('\n'),j.ok?'ok':'bad');$('msg').firstChild.style.whiteSpace='pre-line'}catch(e){say(e.message,'bad')}finally{busy(false)}};
 $('ex').onclick=async()=>{busy(true);try{const j=await call({action:'export'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(j)],{type:'application/json'}));a.download='garaj-zaxira-'+new Date().toISOString().slice(0,10)+'.json';a.click();say('✓ Zaxira tayyor: '+fmt(j.count)+' ta mashina')}catch(e){say(e.message,'bad')}finally{busy(false)}};
 </script></body></html>
