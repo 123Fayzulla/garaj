@@ -245,6 +245,14 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 #drv.rot #hMsg{top:calc(env(safe-area-inset-top,0px) + 8px)}
 #drv.rot #hMap{top:calc(env(safe-area-inset-top,0px) + 62px)}
 #drv.rot .rb{width:96px;height:76px;border-radius:38px}
+
+/* aylantirilgan (vertikal telefon) holat: tugmalar landshaftdagidek, Netlify belgisi ostida qolmasin */
+#drv.rot .rb{width:96px;height:76px;border-radius:38px}
+#drv.rot #ctlR{position:absolute}
+#drv.rot #pdTurbo{position:static;margin:0 0 24px 0}
+#drv.rot #hMap{right:80px}#drv.rot #hMsg{right:80px}
+.hbtn.share{background:linear-gradient(90deg,#f9ce34,#ee2a7b 55%,#6228d7);color:#fff;border-color:#2a1a45}
+#storyModal{z-index:100060}
 </style>
 </head>
 <body>
@@ -293,7 +301,7 @@ input,textarea,.code{-webkit-user-select:text;user-select:text}
 <div id="drv" hidden>
  <canvas id="w3d"></canvas><canvas id="drvFx"></canvas><canvas id="drvCar" width="512" height="320"></canvas>
  <div class="hud-top">
-  <div class="hud-l"><button class="hbtn" id="hExit">Chiqish</button><button class="hbtn" id="hReset">Qaytarish</button><button class="hbtn race" id="hRace" hidden>🏁 Poyga</button></div>
+  <div class="hud-l"><button class="hbtn" id="hExit">Chiqish</button><button class="hbtn" id="hReset">Qaytarish</button><button class="hbtn race" id="hRace" hidden>🏁 Poyga</button><button class="hbtn race share" id="hShare" hidden>📲 Istoriyaga</button></div>
   <div class="hud-mid" id="hLapBox" hidden><small id="hLapNo"></small><b id="hLap"></b><small id="hBest"></small></div>
   <span></span>
  </div>
@@ -1420,7 +1428,7 @@ var WLD=(function(){
   var shade=function(k){return [col[0]*k,col[1]*k,col[2]*k];};
   var ref=[cx,y0+H/2,cz],rup=[cx,y0-80,cz];mb.need(30);mb.quadO(A,B,B2,A2,shade(.92),al,ref);mb.quadO(B,C,C2,B2,shade(.8),al,ref);mb.quadO(C,D,D2,C2,shade(.92),al,ref);mb.quadO(D,A,A2,D2,shade(.8),al,ref);mb.quadO(A2,B2,C2,D2,roof||shade(1.08),al==null?1:(al>.95?1:.99),rup);
  }
- W.CITY=CITY;W.loopHalf=function(){return LOOP.half;};W.MC=MC;W.PL=PL;W.MTOP=MTOP;W.RACE=RACE;W.LAKE=LAKE;W.PAD=PAD;W.HALF=HALF;W.BOUND=BOUND;W.ROADS=ROADS;
+ W.CITY=CITY;W.project=function(x,y,z){var m=W.lastVP;if(!m)return null;var X=m[0]*x+m[4]*y+m[8]*z+m[12],Y=m[1]*x+m[5]*y+m[9]*z+m[13],Wc=m[3]*x+m[7]*y+m[11]*z+m[15];if(Wc<=.1)return null;return [(X/Wc*.5+.5),(1-(Y/Wc*.5+.5))];};W.loopHalf=function(){return LOOP.half;};W.MC=MC;W.PL=PL;W.MTOP=MTOP;W.RACE=RACE;W.LAKE=LAKE;W.PAD=PAD;W.HALF=HALF;W.BOUND=BOUND;W.ROADS=ROADS;
 
  function treeMesh(mb,x,y,z,kind,sz,seed){
   var cr=.78+.35*((seed*7.7)%1),tone=(seed*3.1)%1,tr=[.33,.22,.12];
@@ -1822,6 +1830,7 @@ var WLD=(function(){
    gl.bindBuffer(gl.ARRAY_BUFFER,o.pb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(b.p),gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,o.nb);gl.bufferData(gl.ARRAY_BUFFER,N4,gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,o.cb);gl.bufferData(gl.ARRAY_BUFFER,C4,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(b.i),gl.STATIC_DRAW);return o;}
   var cm=carMesh();W.carM={src:cm,nv:cm.p.length/3,pb:gl.createBuffer(),nb:gl.createBuffer(),cb:gl.createBuffer(),ib:gl.createBuffer(),n:cm.i.length,P:new Float32Array(cm.p.length),Nn:new Int8Array(cm.p.length/3*4)};
   (function(){var C4=new Uint8Array(cm.p.length/3*4);for(var k=0;k<cm.p.length/3;k++){C4[k*4]=Math.round(cm.c[k*4]*255);C4[k*4+1]=Math.round(cm.c[k*4+1]*255);C4[k*4+2]=Math.round(cm.c[k*4+2]*255);C4[k*4+3]=255;}gl.bindBuffer(gl.ARRAY_BUFFER,W.carM.cb);gl.bufferData(gl.ARRAY_BUFFER,C4,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,W.carM.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(cm.i),gl.STATIC_DRAW);})();
+  W.recolorCar=function(body){var cm=W.carM.src,C4=new Uint8Array(cm.p.length/3*4);for(var k=0;k<cm.p.length/3;k++){var r=cm.c[k*4],g=cm.c[k*4+1],b=cm.c[k*4+2],isB=r>.85&&g>.4&&g<.65&&b<.2;if(isB&&body){var sh=r/1;r=body[0]*sh;g=body[1]*sh;b=body[2]*sh;}C4[k*4]=Math.round(Math.min(1,r)*255);C4[k*4+1]=Math.round(Math.min(1,g)*255);C4[k*4+2]=Math.round(Math.min(1,b)*255);C4[k*4+3]=255;}gl.bindBuffer(gl.ARRAY_BUFFER,W.carM.cb);gl.bufferData(gl.ARRAY_BUFFER,C4,gl.STATIC_DRAW);};
   W.gm=[up(W.terrain)];W.farG=W.far.map(up);W.cl=[];for(var ck in W.cells){var cc=W.cells[ck];W.cl.push({cat:cc.cat,cx:cc.cx,cz:cc.cz,g:cc.mb.b.filter(function(b){return b.i.length;}).map(up)});}
   /* ko‘l */
   var wp=[],wi=[],n=36;wp.push(LAKE.x,.15,LAKE.z);for(var k=0;k<=n;k++){var a=k/n*6.2832;wp.push(LAKE.x+Math.cos(a)*(LAKE.r+30),.15,LAKE.z+Math.sin(a)*(LAKE.r+30));if(k>0)wi.push(0,k,k+1);}
@@ -1838,7 +1847,7 @@ var WLD=(function(){
  W.draw=function(cam,tgt,fov,env,time,dt){
   var gl=W.gl,cv=W.cv,Wd=cv.width,Hd=cv.height,e=(typeof env==="number")?(env<.004?ENVS.day:blendEnv(Math.min(1,env))):(W.ENVS[env]||ENVS.day);
   gl.viewport(0,0,Wd,Hd);gl.disable(gl.BLEND);gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.clearColor(e.hor[0],e.hor[1],e.hor[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  var asp=Wd/Hd,vp=m4mul(m4persp(fov,asp,1,7500),m4look(cam,tgt,[0,1,0]));
+  var asp=Wd/Hd,vp=m4mul(m4persp(fov,asp,1,7500),m4look(cam,tgt,[0,1,0]));W.lastVP=vp;
   var f=[tgt[0]-cam[0],tgt[1]-cam[1],tgt[2]-cam[2]],fl=Math.hypot(f[0],f[1],f[2]);f=[f[0]/fl,f[1]/fl,f[2]/fl];
   var r=[f[1]*0-f[2]*1,f[2]*0-f[0]*0,f[0]*1-f[1]*0];r=[-f[2],0,f[0]];var rl=Math.hypot(r[0],r[2]);r=[r[0]/rl,0,r[2]/rl];var u=[r[1]*f[2]-r[2]*f[1],r[2]*f[0]-r[0]*f[2],r[0]*f[1]-r[1]*f[0]];u=[-u[0],-u[1],-u[2]];
   /* up = right x forward ... (to‘g‘rilangan) */
@@ -2063,7 +2072,7 @@ function lotDraw(now){
  /* tanlangan mashina doim ustida */
  if(selD){var S=selD,sc0=carOf(LOT.sel),hk=sc0?code(sc0):"";if(sc0&&(!LOT.hi||LOT.hi.k!==hk)){var hc=document.createElement("canvas");hc.width=380;hc.height=212;var gim=spriteGL(sc0,true);if(gim){hc.getContext("2d").drawImage(gim,0,0);LOT.hi={k:hk,c:hc};}}if(LOT.hi&&LOT.hi.k===hk)S[4]=LOT.hi.c;c.strokeStyle="#ffd27a";c.lineWidth=Math.max(2,S[5]*.1);c.beginPath();c.ellipse(S[0],S[1]-S[3]*.04,S[2]*.6,S[3]*.2,0,0,6.2832);c.stroke();if(S[4])c.drawImage(S[4],S[0]-S[2]/2,S[1]-S[3]*.82,S[2],S[3]);}
  labels.forEach(drawLabel);
- function drawLabel(L){var it=LOT.items[L[2]],car=carOf(L[2]),sel=L[2]===LOT.sel,ft=LOT.feat&&LOT.feat.p===L[2],fs=Math.max(9,Math.min(sel||ft?15:13,L[3]*.62)),t=(ft?"💎 ":"")+it[0];
+ function drawLabel(L){var it=LOT.items[L[2]];if(!it)return;var car=carOf(L[2]),sel=L[2]===LOT.sel,ft=LOT.feat&&LOT.feat.p===L[2],fs=Math.max(9,Math.min(sel||ft?15:13,L[3]*.62)),t=(ft?"💎 ":"")+it[0];
   c.font='400 '+fs+'px "Lilita One","Nunito",system-ui,sans-serif';var tw=c.measureText(t).width,ew=fs*1.15,pw=tw+ew+fs*1.2,ph=fs*1.7,x=L[0]-pw/2,y=L[1]-ph;if(!sel&&!ft&&pw>CW*L[3]*1.02)return;
   if(L[3]<LOT.labelAt*1.0&&!sel){c.globalAlpha=.9;}
   if(ft){var lg=c.createLinearGradient(0,y,0,y+ph);lg.addColorStop(0,"#f2fdff");lg.addColorStop(.6,"#a6e9ff");lg.addColorStop(1,"#6cc8f5");}c.fillStyle=ft?lg:(sel?"#ffe29a":(it[2]===2?"#fff1c2":(it[2]===1?"#eef1f6":"rgba(255,241,214,.96)")));c.strokeStyle=ft?"#1d5f8f":it[2]===2?"#8a5a00":(it[3]===0?"#2f9e5b":"#2a1a45");c.lineWidth=sel?2.2:1.6;c.beginPath();if(c.roundRect)c.roundRect(x,y,pw,ph,ph/2);else c.rect(x,y,pw,ph);c.fill();c.stroke();
@@ -2296,7 +2305,7 @@ function startDrive(i){
  setTimeout(beginWorld,120);
 }
 /* telefon vertikal turgan bo‘lsa (avtomatik burilish o‘chiq yoki brauzer qulflashga ruxsat bermasa), o‘yin ekrani 90° buriladi */
-function applyRot(){var el=$("drv");if(!el)return;var W=window.innerWidth,H=window.innerHeight,rot=DS.on&&H>W*1.05;el.classList.toggle("rot",rot);DS.rot=rot;
+function applyRot(){var el=$("drv");if(!el)return;var W=window.innerWidth,H=window.innerHeight,rot=DS.on&&!DS.noRot&&H>W*1.05;el.classList.toggle("rot",rot);DS.rot=rot;
  if(rot){el.style.width=H+"px";el.style.height=W+"px";el.style.left=W+"px";}else{el.style.width=el.style.height=el.style.left="";}}
 function resize3d(){applyRot();
  var cv=$("w3d"),dpr=Math.min(window.devicePixelRatio||1,1.5,DS.res||1),W=cv.clientWidth||window.innerWidth,H=cv.clientHeight||window.innerHeight;
@@ -2332,7 +2341,7 @@ function beginWorld(){
  cancelAnimationFrame(DS.raf);DS.raf=requestAnimationFrame(tick);
 }
 function quit(){
- DS.on=false;DRV.on=false;cancelAnimationFrame(DS.raf);DS.rc=null;DS.ai=null;try{WLD.cars=[];}catch(e){}if($("hRace"))$("hRace").hidden=true;auStop();$("drv").hidden=true;$("drvLoad").hidden=true;$("top").style.display="";applyRot();
+ DS.on=false;DRV.on=false;cancelAnimationFrame(DS.raf);if($("hShare"))$("hShare").hidden=true;DS.rc=null;DS.ai=null;try{WLD.cars=[];}catch(e){}if($("hRace"))$("hRace").hidden=true;auStop();$("drv").hidden=true;$("drvLoad").hidden=true;$("top").style.display="";applyRot();
  try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen();if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();}catch(e){}
  LOT.dirty=true;
 }
@@ -2363,6 +2372,7 @@ function aiPose(F,laneW){
 }
 function playerGrid(){var T=WLD.track(),g=T[gridIdx()],o=-LANE;return {x:g.x-g.tz*o,z:g.z+g.tx*o,y:g.y,h:Math.atan2(g.tx,g.tz)};}
 function startRace(){
+ $("hShare").hidden=true;
  if(!RL)buildRL();var S=DS.S,g=playerGrid();
  S.x=g.x;S.z=g.z;S.y=g.y;S.h=g.h;S.camH=g.h;S.vx=S.vz=0;S.camY=g.y+3;DS.steer=DS.steerT=0;DS.lookYaw=DS.lookPitch=0;
  DS.ai={F:gridIdx(),v:0,fin:0};DS.rc={phase:"count",t0:performance.now(),pF:gridIdx(),res:null,offT:0};
@@ -2395,7 +2405,7 @@ function raceTick(now,dt,S,sp){
    var tEl=now-rc.tGo,pl=Math.max(0,Math.min(LAPS,Math.floor((rc.pF-N)/N)+1)),pos=rc.pF>=ai.F?1:2;
    $("hLap").textContent=fmtT(tEl);$("hLapNo").textContent="Davra "+Math.max(1,Math.min(LAPS,pl))+"/"+LAPS;$("hBest").textContent="O‘rin: "+pos+"/2";
    var pDone=rc.pF>=N+LAPS*N,aDone=ai.F>=N+LAPS*N;
-   if(pDone&&!aDone){tone(660,990,.4,"triangle",.14);endRace("🏆 G‘alaba! Vaqt: "+fmtT(tEl),6000);}
+   if(pDone&&!aDone){tone(660,990,.4,"triangle",.14);DS.lastWin={ms:tEl,car:DS.car,nick:DS.nick};endRace("🏆 G‘alaba! "+fmtT(tEl)+" · Istoriyaga joylang 📲",7000);$("hShare").hidden=false;}
    else if(aDone&&!pDone){tone(300,200,.4,"sawtooth",.08);endRace("Raqib yutdi. Yana urinib ko‘ring!",6000);}
    else if(pDone&&aDone)endRace("Durang!",5000);
    if(rc.offT>20)endRace("Poyga bekor qilindi",3500);}
@@ -2410,6 +2420,32 @@ function turboUI(racing){var b=$("pdTurbo"),tb=DS.tb;if(!b)return;var off=racing
  var key=(off?1:0)+"|"+deg+"|"+(tb.lock>0?Math.ceil(tb.lock):0)+"|"+(racing?1:0);if(b._k===key)return;b._k=key;
  b.classList.toggle("off",off);b.style.background=racing?"#6d6276":"conic-gradient("+(tb.lock>0?"#9a8aa8":"#ff8a1f")+" "+deg+"deg,#4d3f5c "+deg+"deg)";
  b.textContent=racing?"—":(tb.lock>0?Math.ceil(tb.lock)+"s":"TURBO");}
+/* ---------- POYGA G‘ALABASI ISTORIYASI: 1080×1920 rasm, ulashish yoki saqlash ---------- */
+function makeRaceStory(){
+ var w=DS.lastWin;if(!w)return;var ig=(typeof LOT!=="undefined"&&LOT.ig)||DEFAULT_IG;toast("Rasm tayyorlanmoqda…");
+ var go=function(){var W=1080,H=1920,cv=document.createElement("canvas");cv.width=W;cv.height=H;var c=cv.getContext("2d"),i;
+  var g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,"#160b33");g.addColorStop(.42,"#4a2470");g.addColorStop(.7,"#c2410c");g.addColorStop(1,"#1a0d24");c.fillStyle=g;c.fillRect(0,0,W,H);
+  c.save();c.globalAlpha=.13;c.strokeStyle="#ffd27a";c.lineWidth=6;for(i=0;i<26;i++){var y=80+i*72;c.beginPath();c.moveTo(-100,y+260);c.lineTo(W+100,y-260);c.stroke();}c.restore();
+  function checker(y){var s=36;for(var x=0;x<W;x+=s)for(var r=0;r<2;r++){c.fillStyle=((x/s+r)%2)?"#111":"#fff";c.fillRect(x,y+r*s,s,s);}}
+  checker(0);checker(H-72);
+  c.textAlign="center";c.textBaseline="middle";
+  var tag="@"+ig;c.font='800 46px Nunito,Arial,sans-serif';var tw=c.measureText(tag).width;rrect(c,W/2-tw/2-90,118,tw+150,92,46);c.fillStyle="#fff";c.fill();
+  var ig2=c.createLinearGradient(W/2-tw/2-80,0,W/2-tw/2-20,0);ig2.addColorStop(0,"#f9ce34");ig2.addColorStop(.5,"#ee2a7b");ig2.addColorStop(1,"#6228d7");c.fillStyle=ig2;c.beginPath();c.arc(W/2-tw/2-38,164,30,0,6.2832);c.fill();
+  c.fillStyle="#2a1a45";c.fillText(tag,W/2+25,166);
+  c.font='400 112px "Lilita One",Arial Black,sans-serif';c.lineWidth=18;c.strokeStyle="#2a1a45";c.fillStyle="#ffd27a";c.strokeText("RAQIBNI",W/2,330);c.fillText("RAQIBNI",W/2,330);c.strokeText("YENGDIM! 🏆",W/2,450);c.fillText("YENGDIM! 🏆",W/2,450);
+  c.font='800 40px Nunito,Arial,sans-serif';c.fillStyle="#fff1d6";c.fillText("Obunachilar garaji · Poyga zonasi",W/2,545);
+  c.globalAlpha=.9;c.drawImage(beam(),W/2-460,560,920,640);c.globalAlpha=1;c.drawImage(plat(2),W/2-470,1010,940,400);
+  var im=storyCar(w.car);c.drawImage(im,W/2-450,690,900,504);
+  c.font='400 150px "Lilita One",Arial Black,sans-serif';var tm="⏱ "+fmtT(w.ms);var tw2=c.measureText(tm).width;rrect(c,W/2-tw2/2-50,1330,tw2+100,190,40);c.fillStyle="#ffd27a";c.fill();c.lineWidth=10;c.strokeStyle="#2a1a45";c.stroke();c.fillStyle="#2a1a45";c.fillText(tm,W/2,1430);
+  c.font='400 58px "Lilita One",Arial Black,sans-serif';c.fillStyle="#fff1d6";c.lineWidth=10;c.strokeStyle="#2a1a45";c.strokeText("🥇 1-o‘rin · 2 davra",W/2,1585);c.fillText("🥇 1-o‘rin · 2 davra",W/2,1585);
+  var pn="@"+w.nick;c.font='400 64px "Lilita One",Arial Black,sans-serif';var tw3=Math.min(760,c.measureText(pn).width);rrect(c,W/2-tw3/2-60,1640,tw3+120,104,24);c.fillStyle="#fff";c.fill();c.lineWidth=7;c.strokeStyle="#111";c.stroke();c.fillStyle="#111";c.fillText(pn,W/2,1694,760);
+  c.font='800 36px Nunito,Arial,sans-serif';c.fillStyle="#fff1d6";c.fillText("Sen ham urinib ko‘r! 👉 havola profilda",W/2,1800,1000);
+  cv.toBlob(function(b){var url=URL.createObjectURL(b),fn="poyga-golib-"+w.nick+".png";$("storyImg").src=url;$("storyDl").href=url;$("storyDl").download=fn;
+   var f=null;try{f=new File([b],fn,{type:"image/png"});}catch(e){}
+   $("storyShare").hidden=!(f&&navigator.canShare&&navigator.canShare({files:[f]}));$("storyShare").onclick=function(){navigator.share({files:[f],text:"Raqibni yengdim! ⏱ "+fmtT(w.ms)+" · @"+ig}).catch(function(){});};
+   $("storyModal").hidden=false;},"image/png");};
+ (document.fonts&&document.fonts.load?Promise.all([document.fonts.load('400 92px "Lilita One"'),document.fonts.load('800 40px Nunito')]).catch(function(){}):Promise.resolve()).then(function(){setTimeout(go,30);});
+}
 /* ---------- har kadr ---------- */
 function tick(now){
  if(!DS.on)return;if(!DS.manual)DS.raf=requestAnimationFrame(tick);
@@ -2522,6 +2558,7 @@ function drvInit(){
  hold("stL",function(){DS.steerT=-1;},function(){if(DS.steerT<0)DS.steerT=0;});hold("stR",function(){DS.steerT=1;},function(){if(DS.steerT>0)DS.steerT=0;});
  hold("pdGas",function(){DS.gas=true;},function(){DS.gas=false;});
  hold("pdTurbo",function(){DS.turbo=true;},function(){DS.turbo=false;});
+ $("hShare").onclick=function(){makeRaceStory();};
  $("hRace").onclick=function(){if(DS.on&&DS.rc&&DS.rc.phase==="idle")startRace();};hold("pdBrk",function(){DS.brake=true;},function(){DS.brake=false;});
  var lk=null,lastTap=0;
  $("drv").addEventListener("pointerdown",function(e){if(!DS.on)return;if(e.target.closest&&e.target.closest("button"))return;if(lk)return;lk={id:e.pointerId,x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t0:performance.now(),moved:0};DS.looking=true;DS.lookT=performance.now();});
