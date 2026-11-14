@@ -321,6 +321,12 @@ function makeApi(store, env = {}) {
       await store.meta.put("featured", { nick, p: rec.data.p, t: now() }, {});
       return { ok: true, featured: { nick, p: rec.data.p } };
     }
+       if (body.action === "dump") {
+      const name = ["users", "lot", "meta"].includes(body.area) ? body.area : "users";
+      const keys = await store[name].list(""), from = Math.max(0, body.from | 0), STEP = 100;
+      const items = (await Promise.all(keys.slice(from, from + STEP).map(async (k) => { const r = await store[name].get(k); return r ? [k, r.data] : null; }))).filter(Boolean);
+      return { ok: true, area: name, total: keys.length, next: from + STEP < keys.length ? from + STEP : null, items };
+    }
     if (body.action === "stats") return { ...(await computeStats()), config: await config() };
     if (body.action === "export") { const cars = []; await allChunks((e) => cars.push({ nick: e[0], car: e[1] || null })); return { count: cars.length, cars }; }
     throw new HttpError(400, "Noma’lum amal");
